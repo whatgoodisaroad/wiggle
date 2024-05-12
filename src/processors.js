@@ -216,9 +216,36 @@ class LoggingProcessor extends AudioWorkletProcessor {
   }
 }
 
+class AttenuverterProcessor extends AudioWorkletProcessor {
+  static get parameterDescriptors() {
+    return [
+      { name: 'gain', defaultValue: 1 },
+      { name: 'offset', defaultValue: 0 },
+    ];
+  }
+
+  process(inputs, outputs, parameters) {
+    const input = inputs[0];
+    const output = outputs[0];
+    for (let channelIndex = 0; channelIndex < input.length; ++channelIndex) {
+      for (
+        let sampleIndex = 0;
+        sampleIndex < input[channelIndex].length;
+        ++sampleIndex
+      ) {
+        output[channelIndex][sampleIndex] =
+          input[channelIndex][sampleIndex] * parameters.gain[0] +
+          parameters.offset[0];
+      }
+    }
+    return true;
+  }
+}
+
 registerProcessor("white-noise-processor", WhiteNoiseProcessor);
 registerProcessor("adsr-processor", AdsrProcessor);
 registerProcessor("gate-processor", GateProcessor);
 registerProcessor("control-sequencer-processor", ControlSequencerProcessor);
 registerProcessor('logging-processor', LoggingProcessor);
 registerProcessor("trigger-sequencer-processor", TriggerSequencerProcessor);
+registerProcessor("attenuverter-processor", AttenuverterProcessor);

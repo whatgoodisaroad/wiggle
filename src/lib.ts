@@ -352,7 +352,7 @@ function vcf(
       const vcf = dest as BiquadFilterNode;
       if (inputName === 'source') {
         if (typeof source === 'number') {
-          throw `Invalid VCA source`;
+          throw `Invalid VCF source`;
         } else {
           source.connect(vcf);
         }
@@ -367,6 +367,51 @@ function vcf(
           vcf.Q.value = source;
         } else {
           source.connect(vcf.Q);
+        }
+      }
+    }
+  })
+  return { id };
+}
+
+function attenuverter(context: Module[],
+  {
+    source,
+    gain,
+    offset
+  }: {
+    source: ModuleRef;
+    gain?: Patch;
+    offset?: Patch;
+}): ModuleRef {
+  const id = idCounter++;
+  context.push({
+    id,
+    mapping: { source, gain: gain ?? 1, offset: offset ?? 0 },
+    create(context) {
+      const node = new AudioWorkletNode(context, 'attenuverter-processor');
+      return { node };
+    },
+    connect(inputName, source, dest) {
+      const worklet = dest as AudioWorkletNode;
+      if (inputName === 'source') {
+        if (typeof source === 'number') {
+          throw `Invalid attenuverter source`;
+        } else {
+          source.connect(worklet);
+        }
+      } else if (
+        ['gain', 'offset'].indexOf(inputName) !== -1
+      ) {
+        // @ts-ignore
+        const param = worklet.parameters.get(inputName);
+        if (!param) {
+          throw `Unknown param ${inputName}`;
+        }
+        if (typeof source === 'number') {
+          param.value = source;
+        } else {
+          source.connect(param);
         }
       }
     }
@@ -434,7 +479,7 @@ async function newStart() {
 
   const ctx: Module[] = [];
   
-  const clockLfo = vco(ctx, { frequency: 8, shape: 'square' });
+  const clockLfo = vco(ctx, { frequency: 16, shape: 'square' });
   const clock = gate(ctx, { source: clockLfo });
   const groove = gateSequencer(ctx, {
     trigger: clock,
@@ -442,20 +487,21 @@ async function newStart() {
   });
   const melody = sequentialSwitch(ctx, { 
     trigger: groove,
-    sequence: [pitch.a3, pitch.c3, pitch.f3] 
+    sequence: [pitch.g3, pitch.a3, pitch.g2] 
   });
-  const envelope = adsr(ctx, { gate: groove, decay: 0.4 });
-  const osc = vco(ctx, { frequency: melody, shape: 'square' });
+  const envelope = adsr(ctx, { gate: groove, decay: 0.2 });
+  const osc = vco(ctx, { frequency: melody, shape: 'sawtooth' });
   const level = vca(ctx, { input: osc, gain: envelope });
-  const filterLfo = vca(ctx, {
-    input: vco(ctx, { frequency: 3, shape: 'sine' }),
-    gain: 1000,
+  const filterLfo = attenuverter(ctx, {
+    source: vco(ctx, { frequency: 0.77, shape: 'sine' }),
+    gain: 500,
+    offset: pitch.a5,
   });
   const filter = vcf(ctx, {
     source: level,
     type: 'lowpass',
     cutoff: filterLfo,
-    resonance: 1,
+    resonance: 20,
   });
   output(ctx, { source: filter });
 

@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "tsc --outdir build src/lib.ts && cp src/processors.js build/processors.js",
+    "serve": "python3 -m http.server"
+  }
+}

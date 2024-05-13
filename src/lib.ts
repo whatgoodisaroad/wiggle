@@ -82,7 +82,7 @@ function vco(
   context: Module[],
   { frequency, shape }: { frequency: Patch; shape: OscillatorType }
 ): ModuleRef {
-  const id = idCounter++;
+  const id = ++idCounter;
   context.push({
     id,
     mapping: { frequency },
@@ -115,7 +115,7 @@ function adsr(
     gate: ModuleRef,
   }
 ) {
-  const id = idCounter++;
+  const id = ++idCounter;
   context.push({
     id,
     mapping: {
@@ -163,7 +163,7 @@ function vca(
   context: Module[],
   { input, gain }: { input: ModuleRef, gain: Patch }
 ) {
-  const id = idCounter++;
+  const id = ++idCounter
   context.push({
     id,
     mapping: { input, gain },
@@ -195,7 +195,7 @@ function sequentialSwitch(
   context: Module[],
   { sequence, trigger }: { sequence: number[]; trigger: ModuleRef }
 ) {
-  const id = idCounter++;
+  const id = ++idCounter;
   context.push({
     id,
     mapping: { trigger },
@@ -225,7 +225,7 @@ function gateSequencer(
   context: Module[],
   { sequence, trigger }: { sequence: boolean[]; trigger: ModuleRef }
 ) {
-  const id = idCounter++;
+  const id = ++idCounter;
   context.push({
     id,
     mapping: { trigger },
@@ -252,7 +252,7 @@ function gateSequencer(
 }
 
 function gate(context: Module[], { source }: { source: ModuleRef }) {
-  const id = idCounter++;
+  const id = ++idCounter;
   context.push({
     id,
     mapping: { source },
@@ -279,7 +279,7 @@ function trigger(context: Module[], { gate }: { gate: ModuleRef }) {
 }
 
 function log(context: Module[], { source }: { source: ModuleRef }) {
-  const id = idCounter++;
+  const id = ++idCounter;
   context.push({
     id,
     mapping: { source },
@@ -302,7 +302,7 @@ function log(context: Module[], { source }: { source: ModuleRef }) {
 }
 
 function output(context: Module[], { source }: { source: ModuleRef }) {
-  const id = idCounter++;
+  const id = ++idCounter;
   context.push({
     id,
     mapping: { source },
@@ -339,7 +339,7 @@ function vcf(
     cutoff: Patch,
     resonance: Patch,
 }): ModuleRef {
-  const id = idCounter++;
+  const id = ++idCounter;
   context.push({
     id,
     mapping: { source, cutoff, resonance },
@@ -384,7 +384,7 @@ function attenuverter(context: Module[],
     gain?: Patch;
     offset?: Patch;
 }): ModuleRef {
-  const id = idCounter++;
+  const id = ++idCounter;
   context.push({
     id,
     mapping: { source, gain: gain ?? 1, offset: offset ?? 0 },

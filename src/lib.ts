@@ -1,4 +1,16 @@
 const pitch = {
+  c0: 16.35,
+  c0b: 17.32,
+  d0: 18.35,
+  e0b: 19.45,
+  e0: 20.6,
+  f0: 21.83,
+  g0b: 23.12,
+  g0: 24.5,
+  a0b: 25.96,
+  a0: 27.5,
+  b0b: 29.14,
+  b0: 30.87,
   c1: 32.7,
   d1b: 34.65,
   d1: 36.71,
@@ -487,10 +499,10 @@ async function newStart() {
   });
   const melody = sequentialSwitch(ctx, { 
     trigger: groove,
-    sequence: [pitch.g3, pitch.a3, pitch.g2] 
+    sequence: [pitch.g0, pitch.a0, pitch.g0]
   });
   const envelope = adsr(ctx, { gate: groove, decay: 0.2 });
-  const osc = vco(ctx, { frequency: melody, shape: 'sawtooth' });
+  const osc = vco(ctx, { frequency: melody, shape: 'square' });
   const level = vca(ctx, { input: osc, gain: envelope });
   const filterLfo = attenuverter(ctx, {
     source: vco(ctx, { frequency: 0.77, shape: 'sine' }),

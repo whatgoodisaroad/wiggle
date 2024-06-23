@@ -101,6 +101,7 @@ function vco(
     create(context) {
       const node = context.createOscillator();
       node.type = shape as OscillatorType;
+      node.frequency.value = 0;
       return { node, isOscillator: true };
     },
     connect(inputName, source, dest) {
@@ -499,7 +500,7 @@ async function newStart() {
   });
   const melody = sequentialSwitch(ctx, { 
     trigger: groove,
-    sequence: [pitch.g0, pitch.a0, pitch.g0]
+    sequence: [pitch.g1, pitch.a1, pitch.g1]
   });
   const envelope = adsr(ctx, { gate: groove, decay: 0.2 });
   const osc = vco(ctx, { frequency: melody, shape: 'square' });

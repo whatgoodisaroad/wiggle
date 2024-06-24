@@ -1,13 +1,16 @@
 import { ModuleRef, WiggleContext } from '../WiggleContext';
 
-export function output(context: WiggleContext, { source }: { source: ModuleRef }) {
+export function output(
+  context: WiggleContext,
+  { source, gain = 1 }: { source: ModuleRef; gain?: number }
+) {
   const id = context.getId();
   context.push({
     id,
     mapping: { source },
     create(context) {
       const node = new GainNode(context);
-      node.gain.value = 1;
+      node.gain.value = gain;
       node.connect(context.destination);
       return { node };
     },

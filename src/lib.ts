@@ -1,6 +1,8 @@
 import { ModuleRef, Patch, WiggleContext } from './WiggleContext';
+import { fmKick } from './instrument/fmKick';
 import { adsr } from './module/adsr';
 import { attenuverter } from './module/attenuverter';
+import { clockDivider } from './module/clockDivider';
 import { gate } from './module/gate';
 import { gateSequencer } from './module/gateSequencer';
 import { output } from './module/output';
@@ -16,9 +18,10 @@ async function newStart() {
   const clockLfo = vco(ctx, { frequency: 16, shape: 'square' });
   const clock = gate(ctx, { source: clockLfo });
   const groove = gateSequencer(ctx, {
-    trigger: clock,
-    sequence: [true, false],
+    trigger: clockDivider(ctx, { trigger: clock, division: 4 }),
+    sequence: [false, true],
   });
+
   const melody = sequentialSwitch(ctx, { 
     trigger: groove,
     sequence: [pitch.g1, pitch.a1, pitch.g1]
@@ -37,7 +40,11 @@ async function newStart() {
     cutoff: filterLfo,
     resonance: 20,
   });
-  output(ctx, { source: filter });
+  output(ctx, { source: filter, gain: 0.05 });
+
+  const div8 = clockDivider(ctx, { trigger: clock, division: 8 });
+  const kick = fmKick(ctx, { gate: div8 });
+  output(ctx, { source: kick });
 
   ctx.start();
 }

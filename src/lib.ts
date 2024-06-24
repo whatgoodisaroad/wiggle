@@ -10,13 +10,9 @@ import { vcf } from './module/vcf';
 import { vco } from './module/vco';
 import { pitch } from './pitch';
 
-let cancel = () => {};
+const ctx = new WiggleContext();
 
-async function newStart() {
-  cancel();
-
-  const ctx = new WiggleContext();
-  
+async function newStart() {  
   const clockLfo = vco(ctx, { frequency: 16, shape: 'square' });
   const clock = gate(ctx, { source: clockLfo });
   const groove = gateSequencer(ctx, {
@@ -43,11 +39,11 @@ async function newStart() {
   });
   output(ctx, { source: filter });
 
-  ctx.reify().then((r) => cancel = r.cancel);
+  ctx.start();
 }
 
 function stopAll(): void {
-  cancel();
+  ctx.stop();
 }
 
 document.querySelector('#startButton').addEventListener('click', newStart);

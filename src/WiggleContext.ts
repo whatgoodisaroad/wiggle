@@ -12,6 +12,7 @@ export class WiggleContext {
   _idCounter: number = 0;
   _modules: Module[] = [];
   _audioContext: AudioContext | null = null;
+  _oscillators: OscillatorNode[] = [];
     
   getId(): number {
     return ++this._idCounter;
@@ -21,18 +22,22 @@ export class WiggleContext {
     this._modules.push(module);
   }
 
-  async reify(): Promise<{ cancel(): void }> {
+  async start(): Promise<void> {
+    if (this._audioContext) {
+      console.log('Already started');
+      return;
+    }
+
     const AudioContext = window.AudioContext || window['webkitAudioContext'];
     this._audioContext = new AudioContext();
     await this._audioContext.audioWorklet.addModule("../build/processors.js");
-    const oscillators: OscillatorNode[] = [];
     const nodes = { }; // new Map<ModuleId, AudioNode>();
   
     for (const module of this._modules) {
       const { node, isOscillator } = module.create(this._audioContext);
       nodes[module.id] = node;
       if (isOscillator) {
-        oscillators.push(node as OscillatorNode);
+        this._oscillators.push(node as OscillatorNode);
       }
     }
   
@@ -60,17 +65,20 @@ export class WiggleContext {
       }
     }
   
-    for (const osc of oscillators) {
+    for (const osc of this._oscillators) {
       osc.start();
     }
-  
-    return {
-      cancel() {
-        for (const osc of oscillators) {
-          osc.stop();
-        }
-        this._audioContext.close();
-      }
+  }
+
+  stop() {
+    this._modules = [];
+    while (this._oscillators.length > 0) {
+      const osc = this._oscillators.shift();
+      osc.stop();
+    }
+    if (this._audioContext) {
+      this._audioContext.close();
+      this._audioContext = null;
     }
   }
 }

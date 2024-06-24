@@ -43,22 +43,24 @@ async function newStart() {
   });
   output(ctx, { source: filter, gain: 0.05 });
 
-  const div8 = clockDivider(ctx, { trigger: clock, division: 8 });
-  const kick = fmKick(ctx, { gate: div8 });
-  output(ctx, { source: kick });
+  output(ctx, {
+    source: fmKick(ctx, {
+      gate: clockDivider(ctx, { trigger: clock, division: 8 }),
+    }),
+  });
 
-  const h = hat(ctx, { gate: gateSequencer(ctx, {
-    sequence: [false, true],
-    trigger: clockDivider(ctx, { trigger: clock, division: 4 }),
-  }) });
-  output(ctx, { source: h, gain: 0.5 });
+  output(ctx, {
+    source: hat(ctx, {
+      gate: gateSequencer(ctx, {
+        sequence: [false, true],
+        trigger: clockDivider(ctx, { trigger: clock, division: 4 }),
+      }),
+    }),
+    gain: 0.5,
+  });
 
   ctx.start();
 }
 
-function stopAll(): void {
-  ctx.stop();
-}
-
 document.querySelector('#startButton').addEventListener('click', newStart);
-document.querySelector('#stopButton').addEventListener('click', stopAll);
+document.querySelector('#stopButton').addEventListener('click', () => ctx.stop());

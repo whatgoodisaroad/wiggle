@@ -1,9 +1,11 @@
 {
-  "dependencies": {
-    "typescript": "^5.4.5"
-  },
   "scripts": {
-    "build": "tsc --outdir build src/lib.ts && cp src/processors.js build/processors.js",
+    "build": "npx webpack build && cp src/processors.js build/processors.js",
     "serve": "python3 -m http.server"
+  },
+  "devDependencies": {
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.5.2",
+    "webpack-cli": "^5.1.4"
   }
 }

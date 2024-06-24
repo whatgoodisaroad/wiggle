@@ -1,5 +1,6 @@
 import { ModuleRef, Patch, WiggleContext } from './WiggleContext';
 import { fmKick } from './instrument/fmKick';
+import { hat } from './instrument/hat';
 import { adsr } from './module/adsr';
 import { attenuverter } from './module/attenuverter';
 import { clockDivider } from './module/clockDivider';
@@ -18,13 +19,13 @@ async function newStart() {
   const clockLfo = vco(ctx, { frequency: 16, shape: 'square' });
   const clock = gate(ctx, { source: clockLfo });
   const groove = gateSequencer(ctx, {
-    trigger: clockDivider(ctx, { trigger: clock, division: 4 }),
-    sequence: [false, true],
+    trigger: clock, 
+    sequence: [false, false, false, false, true, false, true, false],
   });
 
   const melody = sequentialSwitch(ctx, { 
     trigger: groove,
-    sequence: [pitch.g1, pitch.a1, pitch.g1]
+    sequence: [pitch.g1, pitch.a2, pitch.g1]
   });
   const envelope = adsr(ctx, { gate: groove, decay: 0.2 });
   const osc = vco(ctx, { frequency: melody, shape: 'square' });
@@ -45,6 +46,12 @@ async function newStart() {
   const div8 = clockDivider(ctx, { trigger: clock, division: 8 });
   const kick = fmKick(ctx, { gate: div8 });
   output(ctx, { source: kick });
+
+  const h = hat(ctx, { gate: gateSequencer(ctx, {
+    sequence: [false, true],
+    trigger: clockDivider(ctx, { trigger: clock, division: 4 }),
+  }) });
+  output(ctx, { source: h, gain: 0.5 });
 
   ctx.start();
 }

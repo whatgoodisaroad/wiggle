@@ -1,0 +1,24 @@
+import { ModuleRef, WiggleContext } from '../WiggleContext';
+
+export function log(context: WiggleContext, { source }: { source: ModuleRef }) {
+  const id = context.getId();
+  context.push({
+    id,
+    mapping: { source },
+    create(context) {
+      const node = new AudioWorkletNode(context, "logging-processor");
+      return { node };
+    },
+    connect(inputName, source, dest) {
+      const vca = dest as GainNode;
+      if (inputName === 'source') {
+        if (typeof source === 'number') {
+          throw `Invalid log source`;
+        } else {
+          source.connect(vca);
+        }
+      }
+    }
+  })
+  return { id };
+}

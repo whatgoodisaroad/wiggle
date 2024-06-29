@@ -41,7 +41,7 @@ async function newStart() {
     cutoff: filterLfo,
     resonance: 20,
   });
-  output(ctx, { source: filter, gain: 0.05 });
+  // output(ctx, { source: filter, gain: 0.05 });
 
   output(ctx, {
     source: fmKick(ctx, {

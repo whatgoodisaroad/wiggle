@@ -17,5 +17,5 @@ export function hat(
     cutoff: pitch.a1,
     type: 'notch',
     resonance: 0.001,
-  })
+  });
 }

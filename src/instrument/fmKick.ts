@@ -66,7 +66,7 @@ export function fmKick(
       type: 'bandpass',
       resonance: 0.01,
     }),
-    gain: 0.1
+    gain: 0.05,
   });
   return sum(context, { inputs: [body, transient] });
 }

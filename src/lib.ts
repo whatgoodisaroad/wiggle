@@ -1,5 +1,6 @@
 import { ModuleRef, Patch, WiggleContext } from './WiggleContext';
 import { fmKick } from './instrument/fmKick';
+import { fmSnare } from './instrument/fmSnare';
 import { hat } from './instrument/hat';
 import { adsr } from './module/adsr';
 import { attenuverter } from './module/attenuverter';
@@ -41,7 +42,7 @@ async function newStart() {
     cutoff: filterLfo,
     resonance: 20,
   });
-  // output(ctx, { source: filter, gain: 0.05 });
+  output(ctx, { source: filter, gain: 0.05 });
 
   output(ctx, {
     source: fmKick(ctx, {
@@ -57,6 +58,12 @@ async function newStart() {
       }),
     }),
     gain: 0.5,
+  });
+
+  output(ctx, {
+    source: fmSnare(ctx, {
+      gate: clockDivider(ctx, { trigger: clock, division: 16 }),
+    }),
   });
 
   ctx.start();

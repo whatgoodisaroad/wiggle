@@ -1,11 +1,14 @@
 {
   "scripts": {
     "build": "npx webpack build && cp src/processors.js build/processors.js",
-    "serve": "python3 -m http.server"
+    "serve": "npx http-server -o ./src/index.htm"
   },
   "devDependencies": {
     "ts-loader": "^9.5.1",
     "typescript": "^5.5.2",
     "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "http-server": "^14.1.1"
   }
 }

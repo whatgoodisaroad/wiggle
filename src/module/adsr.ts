@@ -10,9 +10,7 @@ export function adsr(
     gate: ModuleRef,
   }
 ) {
-  const id = context.getId();
-  context.push({
-    id,
+  return context.define({
     mapping: {
       attack: attack ?? 0,
       decay: decay ?? 0,
@@ -51,5 +49,4 @@ export function adsr(
       }
     }
   });
-  return { id };
 }

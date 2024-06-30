@@ -1,11 +1,11 @@
 export type ModuleId = number;
 export type Patch = number | ModuleRef;
-export type Module = {
-  id: ModuleId,
+export type ModuleDefinition = {
   mapping: Record<string, Patch>;
   create(context: AudioContext): ({ node: AudioNode; isOscillator?: boolean });
   connect(inputName: string, source: AudioNode | number, destination: AudioNode);
 };
+export type Module = { id: ModuleId } & ModuleDefinition;
 export type ModuleRef = { id: ModuleId; };
 
 export class WiggleContext {
@@ -13,13 +13,11 @@ export class WiggleContext {
   _modules: Module[] = [];
   _audioContext: AudioContext | null = null;
   _oscillators: OscillatorNode[] = [];
-    
-  getId(): number {
-    return ++this._idCounter;
-  }
 
-  push(module: Module): void {
-    this._modules.push(module);
+  define(module: ModuleDefinition): ModuleRef {
+    const id = ++this._idCounter;
+    this._modules.push({ ...module, id });
+    return { id };
   }
 
   async start(): Promise<void> {

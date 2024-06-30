@@ -4,9 +4,7 @@ export function sequentialSwitch(
   context: WiggleContext,
   { sequence, trigger }: { sequence: number[]; trigger: ModuleRef }
 ) {
-  const id = context.getId();
-  context.push({
-    id,
+  return context.define({
     mapping: { trigger },
     create(context) {
       const node = new AudioWorkletNode(
@@ -26,6 +24,5 @@ export function sequentialSwitch(
         }
       }
     }
-  })
-  return { id };
+  });
 }

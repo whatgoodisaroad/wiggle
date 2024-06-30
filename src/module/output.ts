@@ -4,9 +4,7 @@ export function output(
   context: WiggleContext,
   { source, gain = 1 }: { source: ModuleRef; gain?: number }
 ) {
-  const id = context.getId();
-  context.push({
-    id,
+  return context.define({
     mapping: { source },
     create(context) {
       const node = new GainNode(context);
@@ -24,7 +22,6 @@ export function output(
         }
       }
     }
-  })
-  return { id };
+  });
 }
   

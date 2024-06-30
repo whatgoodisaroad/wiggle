@@ -9,9 +9,7 @@ export function quantizer(
     source: ModuleRef;
     quanta: number[];
 }): ModuleRef {
-  const id = context.getId();
-  context.push({
-    id,
+  return context.define({
     mapping: { source },
     create(context) {
       const node = new AudioWorkletNode(
@@ -31,6 +29,5 @@ export function quantizer(
         }
       }
     }
-  })
-  return { id };
+  });
 }

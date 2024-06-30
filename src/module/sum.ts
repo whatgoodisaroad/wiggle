@@ -4,14 +4,11 @@ export function sum(
   context: WiggleContext,
   { inputs }: { inputs: ModuleRef[] }
 ): ModuleRef {
-  const id = context.getId();
   const mapping: Record<string, Patch> = {};
   for (let index = 0; index < inputs.length; ++index) {
     mapping[index] = inputs[index];
   }
-
-  context.push({
-    id,
+  return context.define({
     mapping,
     create(context) {
       const node = context.createGain();
@@ -27,5 +24,4 @@ export function sum(
       }
     },
   });
-  return { id };
 }

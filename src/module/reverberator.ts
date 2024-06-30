@@ -5,9 +5,7 @@ export function reverberator(
   context: WiggleContext,
   { source }: { source: ModuleRef }
 ): ModuleRef {
-  const id = context.getId();
-  context.push({
-    id,
+  return context.define({
     mapping: { source },
     create(context) {
       const node: AudioNode = new SimpleReverb(context);
@@ -24,5 +22,4 @@ export function reverberator(
       }
     },
   });
-  return { id };
 }

@@ -10,9 +10,7 @@ export function attenuverter(context: WiggleContext,
     gain?: Patch;
     offset?: Patch;
 }): ModuleRef {
-  const id = context.getId();
-  context.push({
-    id,
+  return context.define({
     mapping: { source, gain: gain ?? 1, offset: offset ?? 0 },
     create(context) {
       const node = new AudioWorkletNode(context, 'attenuverter-processor');
@@ -42,5 +40,4 @@ export function attenuverter(context: WiggleContext,
       }
     }
   })
-  return { id };
 }

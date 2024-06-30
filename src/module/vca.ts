@@ -4,9 +4,7 @@ export function vca(
   context: WiggleContext,
   { input, gain }: { input: ModuleRef, gain: Patch }
 ) {
-  const id = context.getId();
-  context.push({
-    id,
+  return context.define({
     mapping: { input, gain },
     create(context) {
       const node = new GainNode(context);
@@ -28,6 +26,5 @@ export function vca(
         }
       }
     }
-  })
-  return { id };
+  });
 }

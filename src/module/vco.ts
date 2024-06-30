@@ -4,9 +4,7 @@ export function vco(
   context: WiggleContext,
   { frequency, shape }: { frequency: Patch; shape: OscillatorType }
 ): ModuleRef {
-  const id = context.getId();
-  context.push({
-    id,
+  return context.define({
     mapping: { frequency },
     create(context) {
       const node = context.createOscillator();
@@ -25,5 +23,4 @@ export function vco(
       }
     },
   });
-  return { id };
 }

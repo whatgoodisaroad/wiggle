@@ -13,9 +13,7 @@ export function vcf(
     cutoff: Patch,
     resonance: Patch,
 }): ModuleRef {
-  const id = context.getId();
-  context.push({
-    id,
+  return context.define({
     mapping: { source, cutoff, resonance },
     create(context) {
       const node = new BiquadFilterNode(context, { type });
@@ -44,6 +42,5 @@ export function vcf(
         }
       }
     }
-  })
-  return { id };
+  });
 }

@@ -1,9 +1,7 @@
 import { ModuleRef, WiggleContext } from '../WiggleContext';
 
 export function gate(context: WiggleContext, { source }: { source: ModuleRef }) {
-  const id = context.getId();
-  context.push({
-    id,
+  return context.define({
     mapping: { source },
     create(context) {
       const node = new AudioWorkletNode(context, "gate-processor");
@@ -20,5 +18,4 @@ export function gate(context: WiggleContext, { source }: { source: ModuleRef }) 
       }
     }
   })
-  return { id };
 }

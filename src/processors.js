@@ -242,6 +242,44 @@ class AttenuverterProcessor extends AudioWorkletProcessor {
   }
 }
 
+class QuantizerProcessor extends AudioWorkletProcessor {
+  constructor(options) {
+    super(options);
+    this._quanta = options.processorOptions.quanta ?? [];
+  }
+
+  process(inputs, outputs) {
+    const input = inputs[0];
+    const output = outputs[0];
+    for (let channelIndex = 0; channelIndex < input.length; ++channelIndex) {
+      for (
+        let sampleIndex = 0;
+        sampleIndex < input[channelIndex].length;
+        ++sampleIndex
+      ) {
+        output[channelIndex][sampleIndex] =
+          this.snap(input[channelIndex][sampleIndex], this._quanta);
+      }
+    }
+    return true;
+  }
+
+  snap(value, quanta) {
+    if (quanta[0] > value) {
+      return quanta[0];
+    }
+
+    for (let index = 0; index < quanta.length - 1; ++index) {
+      const quantum = quanta[index];
+      const nextQuantum = quanta[index + 1];
+      if (quantum <= value && nextQuantum > value) {
+        return value - quantum < nextQuantum - value ? quantum : nextQuantum;
+      }
+    }
+    return quanta[quanta.length - 1];
+  }
+}
+
 registerProcessor("white-noise-processor", WhiteNoiseProcessor);
 registerProcessor("adsr-processor", AdsrProcessor);
 registerProcessor("gate-processor", GateProcessor);
@@ -249,3 +287,4 @@ registerProcessor("control-sequencer-processor", ControlSequencerProcessor);
 registerProcessor('logging-processor', LoggingProcessor);
 registerProcessor("trigger-sequencer-processor", TriggerSequencerProcessor);
 registerProcessor("attenuverter-processor", AttenuverterProcessor);
+registerProcessor("quantizer-processor", QuantizerProcessor);

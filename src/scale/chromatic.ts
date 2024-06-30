@@ -1,6 +1,35 @@
+export type PitchClass =
+  | 'c'
+  | 'db'
+  | 'd'
+  | 'eb'
+  | 'e'
+  | 'f'
+  | 'gb'
+  | 'g'
+  | 'ab'
+  | 'a'
+  | 'bb'
+  | 'b';
+
+export const PITCH_CLASS_INDEX: Record<PitchClass, number> = {
+  c: 0,
+  db: 1,
+  d: 2,
+  eb: 3,
+  e: 4,
+  f: 5,
+  gb: 6,
+  g: 7,
+  ab: 8,
+  a: 9,
+  bb: 10,
+  b: 11,
+};
+
 export const PITCH = {
   c0: 16.35,
-  c0b: 17.32,
+  d0b: 17.32,
   d0: 18.35,
   e0b: 19.45,
   e0: 20.6,
@@ -72,3 +101,7 @@ export const PITCH = {
   b5b: 932.33,
   b5: 987.77,
 };
+
+const inOrder = Object.values(PITCH);
+inOrder.sort((a, b) => a - b);
+export const CHROMATIC_PICHES_IN_ORDER = inOrder;

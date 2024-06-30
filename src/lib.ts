@@ -13,6 +13,9 @@ import { PITCH } from './scale/chromatic';
 import { clock } from './module/clock';
 import { drumSequencer } from './sequencer/drumSequencer';
 import { reverberator } from './module/reverberator';
+import { quantizer } from './module/quantizer';
+import { attenuverter } from './module/attenuverter';
+import { NATURAL_MINOR, enumerateScale } from './scale/modes';
 
 const ctx = new WiggleContext();
 
@@ -58,9 +61,8 @@ async function newStart() {
       }),
       gain: kickVelocity,
     }),
-    gain: 0.5,
+    gain: 0.7,
   });
-
   output(ctx, {
     source: vca(ctx, {
       input: hat(ctx, {
@@ -70,12 +72,37 @@ async function newStart() {
     }),
     gain: 0.4,
   });
-
   output(ctx, {
     source: snare(ctx, {
       gate: snareGate,
     }),
     gain: 0.5,
+  });
+
+  const quantizedPitch = quantizer(ctx, {
+    source: attenuverter(ctx, {
+      source: vco(ctx, {
+        frequency: 0.25,
+        shape: 'sawtooth',
+      }),
+      offset: PITCH.c4,
+      gain: 100,
+    }),
+    quanta: enumerateScale('db', NATURAL_MINOR),
+  });
+  output(ctx, {
+    source: vca(ctx, {
+      input: vco(ctx, {
+        frequency: quantizedPitch,
+        shape: 'sawtooth',
+      }),
+      gain: adsr(ctx, {
+        attack: 0.01,
+        decay: 0.1,
+        gate: master.quarter
+      })
+    }),
+    gain: 0.05
   });
 
   ctx.start();

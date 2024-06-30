@@ -1,11 +1,10 @@
-import { ModuleRef, Patch, WiggleContext } from './WiggleContext';
+import { WiggleContext } from './WiggleContext';
 import { fmKick } from './instrument/fmKick';
-import { fmSnare } from './instrument/fmSnare';
+import { snare } from './instrument/snare';
 import { hat } from './instrument/hat';
 import { adsr } from './module/adsr';
 import { attenuverter } from './module/attenuverter';
 import { clockDivider } from './module/clockDivider';
-import { gate } from './module/gate';
 import { gateSequencer } from './module/gateSequencer';
 import { output } from './module/output';
 import { sequentialSwitch } from './module/sequentialSwitch';
@@ -13,14 +12,16 @@ import { vca } from './module/vca';
 import { vcf } from './module/vcf';
 import { vco } from './module/vco';
 import { pitch } from './pitch';
+import { clock } from './module/clock';
 
 const ctx = new WiggleContext();
 
 async function newStart() {  
-  const clockLfo = vco(ctx, { frequency: 16, shape: 'square' });
-  const clock = gate(ctx, { source: clockLfo });
+  const master = clock(ctx, { beatsPerMinute: 120 });
+
+  const clockLfo = master.eighth;
   const groove = gateSequencer(ctx, {
-    trigger: clock, 
+    trigger: clockLfo,
     sequence: [false, false, false, false, true, false, true, false],
   });
 
@@ -46,7 +47,7 @@ async function newStart() {
 
   output(ctx, {
     source: fmKick(ctx, {
-      gate: clockDivider(ctx, { trigger: clock, division: 8 }),
+      gate: clockDivider(ctx, { trigger: clockLfo, division: 8 }),
     }),
   });
 
@@ -54,15 +55,15 @@ async function newStart() {
     source: hat(ctx, {
       gate: gateSequencer(ctx, {
         sequence: [false, true],
-        trigger: clockDivider(ctx, { trigger: clock, division: 4 }),
+        trigger: clockDivider(ctx, { trigger: clockLfo, division: 4 }),
       }),
     }),
     gain: 0.5,
   });
 
   output(ctx, {
-    source: fmSnare(ctx, {
-      gate: clockDivider(ctx, { trigger: clock, division: 16 }),
+    source: snare(ctx, {
+      gate: clockDivider(ctx, { trigger: clockLfo, division: 16 }),
     }),
   });
 

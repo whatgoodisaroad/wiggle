@@ -8,13 +8,9 @@ import { vcf } from '../module/vcf';
 import { vco } from '../module/vco';
 import { pitch } from '../pitch';
 
-export function fmSnare(
+export function snare(
   context: WiggleContext,
-  {
-    gate,
-  }: {
-    gate: ModuleRef;
-  }
+  { gate }: { gate: ModuleRef }
 ): ModuleRef {
   const [fundamental, partial1, partial2, partial3] = [
     vco(context, { frequency: 203, shape: 'sine' }),

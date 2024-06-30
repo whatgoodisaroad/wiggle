@@ -6,7 +6,7 @@ import { sum } from '../module/sum';
 import { vca } from '../module/vca';
 import { vcf } from '../module/vcf';
 import { vco } from '../module/vco';
-import { pitch } from '../pitch';
+import { PITCH } from '../scale/chromatic';
 
 export function snare(
   context: WiggleContext,
@@ -59,7 +59,7 @@ export function snare(
                 gate,
               }),
             }),
-            cutoff: pitch.a5,
+            cutoff: PITCH.a5,
             type: 'bandpass',
             resonance: 0.05,
           }),

@@ -6,7 +6,7 @@ import { sum } from '../module/sum';
 import { vca } from '../module/vca';
 import { vcf } from '../module/vcf';
 import { vco } from '../module/vco';
-import { pitch } from '../pitch';
+import { PITCH } from '../scale/chromatic';
 
 export function fmKick(
   context: WiggleContext,
@@ -14,7 +14,7 @@ export function fmKick(
     gate,
     decay = 0.25,
     pitchDecay = 0.15,
-    frequency = pitch.a0,
+    frequency = PITCH.a0,
     fmPitchFactor = 1.1,
     cutoff,
   }: {
@@ -62,7 +62,7 @@ export function fmKick(
           gate,
         }),
       }),
-      cutoff: pitch.a5,
+      cutoff: PITCH.a5,
       type: 'bandpass',
       resonance: 0.01,
     }),

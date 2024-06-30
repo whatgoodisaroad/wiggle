@@ -3,7 +3,7 @@ import { adsr } from '../module/adsr';
 import { noise } from '../module/noise';
 import { vca } from '../module/vca';
 import { vcf } from '../module/vcf';
-import { pitch } from '../pitch';
+import { PITCH } from '../scale/chromatic';
 
 export function hat(
   context: WiggleContext,
@@ -14,7 +14,7 @@ export function hat(
       input: noise(context),
       gain: adsr(context, { attack: 0.005, decay, gate }),
     }),
-    cutoff: pitch.a1,
+    cutoff: PITCH.a1,
     type: 'notch',
     resonance: 0.001,
   });

@@ -9,7 +9,7 @@ import { sequentialSwitch } from './sequencer/sequentialSwitch';
 import { vca } from './module/vca';
 import { vcf } from './module/vcf';
 import { vco } from './module/vco';
-import { pitch } from './pitch';
+import { PITCH } from './scale/chromatic';
 import { clock } from './module/clock';
 import { drumSequencer } from './sequencer/drumSequencer';
 import { reverberator } from './module/reverberator';
@@ -25,7 +25,7 @@ async function newStart() {
   });
   const melody = sequentialSwitch(ctx, { 
     trigger: groove,
-    sequence: [pitch.g1, pitch.a2, pitch.c1]
+    sequence: [PITCH.g1, PITCH.a2, PITCH.c1]
   });
   const envelope = adsr(ctx, { gate: groove, decay: 0.2 });
   const osc = vco(ctx, { frequency: melody, shape: 'square' });

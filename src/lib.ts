@@ -12,6 +12,7 @@ import { vco } from './module/vco';
 import { pitch } from './pitch';
 import { clock } from './module/clock';
 import { drumSequencer } from './sequencer/drumSequencer';
+import { reverberator } from './module/reverberator';
 
 const ctx = new WiggleContext();
 
@@ -35,7 +36,8 @@ async function newStart() {
     cutoff: 1_000,
     resonance: 20,
   });
-  output(ctx, { source: filter, gain: 0.05 });
+  const reverb = reverberator(ctx, { source: filter });
+  output(ctx, { source: reverb, gain: 0.05 });
 
   const {
     gates: [kickGate, hatGate, snareGate],

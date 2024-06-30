@@ -18,7 +18,7 @@ export function output(
       const vca = dest as GainNode;
       if (inputName === 'source') {
         if (typeof source === 'number') {
-          throw `Invalid VCA source`;
+          throw `Invalid gain source`;
         } else {
           source.connect(vca);
         }

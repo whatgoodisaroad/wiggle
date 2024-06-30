@@ -17,96 +17,90 @@ import { quantizer } from './module/quantizer';
 import { attenuverter } from './module/attenuverter';
 import { NATURAL_MINOR, enumerateScale } from './scale/modes';
 
-const ctx = new WiggleContext();
+const ctx = new WiggleContext('#container');
+const master = clock(ctx, { beatsPerMinute: 120 });
 
-async function newStart() {  
-  const master = clock(ctx, { beatsPerMinute: 120 });
+const groove = gateSequencer(ctx, {
+  trigger: master.eighth,
+  sequence: [false, false, false, false, true, false, true, false],
+});
+const melody = sequentialSwitch(ctx, { 
+  trigger: groove,
+  sequence: [PITCH.g1, PITCH.a2, PITCH.c1]
+});
+const envelope = adsr(ctx, { gate: groove, decay: 0.2 });
+const osc = vco(ctx, { frequency: melody, shape: 'square' });
+const level = vca(ctx, { input: osc, gain: envelope });
+const filter = vcf(ctx, {
+  source: level,
+  type: 'lowpass',
+  cutoff: 1_000,
+  resonance: 20,
+});
+const reverb = reverberator(ctx, { source: filter });
+output(ctx, { source: reverb, gain: 0.05 });
 
-  const groove = gateSequencer(ctx, {
-    trigger: master.eighth,
-    sequence: [false, false, false, false, true, false, true, false],
-  });
-  const melody = sequentialSwitch(ctx, { 
-    trigger: groove,
-    sequence: [PITCH.g1, PITCH.a2, PITCH.c1]
-  });
-  const envelope = adsr(ctx, { gate: groove, decay: 0.2 });
-  const osc = vco(ctx, { frequency: melody, shape: 'square' });
-  const level = vca(ctx, { input: osc, gain: envelope });
-  const filter = vcf(ctx, {
-    source: level,
-    type: 'lowpass',
-    cutoff: 1_000,
-    resonance: 20,
-  });
-  const reverb = reverberator(ctx, { source: filter });
-  output(ctx, { source: reverb, gain: 0.05 });
+const {
+  gates: [kickGate, hatGate, snareGate],
+  velocities: [kickVelocity, hatVelocity]
+} = drumSequencer(ctx, {
+  channels: [
+    '.   .   .   .   .   .   .   . 7 ',
+    ' .5   5.',
+    '    .   ',
+  ],
+  clockX2: master.eighth,
+});
 
-  const {
-    gates: [kickGate, hatGate, snareGate],
-    velocities: [kickVelocity, hatVelocity]
-  } = drumSequencer(ctx, {
-    channels: [
-      '.   .   .   .   .   .   .   . 7 ',
-      ' .5   5.',
-      '    .   ',
-    ],
-    clockX2: master.eighth,
-  });
-
-  output(ctx, {
-    source: vca(ctx, {
-      input: fmKick(ctx, {
-        gate: kickGate,
-      }),
-      gain: kickVelocity,
+output(ctx, {
+  source: vca(ctx, {
+    input: fmKick(ctx, {
+      gate: kickGate,
     }),
-    gain: 0.7,
-  });
-  output(ctx, {
-    source: vca(ctx, {
-      input: hat(ctx, {
-        gate: hatGate,
-      }),
-      gain: hatVelocity,
+    gain: kickVelocity,
+  }),
+  gain: 0.7,
+});
+output(ctx, {
+  source: vca(ctx, {
+    input: hat(ctx, {
+      gate: hatGate,
     }),
-    gain: 0.4,
-  });
-  output(ctx, {
-    source: snare(ctx, {
-      gate: snareGate,
-    }),
-    gain: 0.5,
-  });
+    gain: hatVelocity,
+  }),
+  gain: 0.4,
+});
+output(ctx, {
+  source: snare(ctx, {
+    gate: snareGate,
+  }),
+  gain: 0.5,
+});
 
-  const quantizedPitch = quantizer(ctx, {
-    source: attenuverter(ctx, {
-      source: vco(ctx, {
-        frequency: 0.25,
-        shape: 'sawtooth',
-      }),
-      offset: PITCH.c4,
-      gain: 100,
+const quantizedPitch = quantizer(ctx, {
+  source: attenuverter(ctx, {
+    source: vco(ctx, {
+      frequency: 120 / (60 * 16),
+      shape: 'sawtooth',
     }),
-    quanta: enumerateScale('db', NATURAL_MINOR),
-  });
-  output(ctx, {
-    source: vca(ctx, {
-      input: vco(ctx, {
-        frequency: quantizedPitch,
-        shape: 'sawtooth',
-      }),
-      gain: adsr(ctx, {
-        attack: 0.01,
-        decay: 0.1,
-        gate: master.quarter
-      })
+    offset: PITCH.c4,
+    gain: 100,
+  }),
+  quanta: enumerateScale('db', NATURAL_MINOR),
+});
+output(ctx, {
+  source: vca(ctx, {
+    input: vco(ctx, {
+      frequency: quantizedPitch,
+      shape: 'sawtooth',
     }),
-    gain: 0.05
-  });
+    gain: adsr(ctx, {
+      attack: 0.01,
+      decay: 0.1,
+      gate: master.quarter
+    })
+  }),
+  gain: 0.05
+});
 
-  ctx.start();
-}
-
-document.querySelector('#startButton').addEventListener('click', newStart);
-document.querySelector('#stopButton').addEventListener('click', () => ctx.stop());
+ctx.renderPlaybackWidget();

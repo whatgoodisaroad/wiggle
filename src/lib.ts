@@ -15,7 +15,9 @@ import { drumSequencer } from './sequencer/drumSequencer';
 import { reverberator } from './module/reverberator';
 import { quantizer } from './module/quantizer';
 import { attenuverter } from './module/attenuverter';
-import { NATURAL_MINOR, enumerateScale } from './scale/modes';
+import { MAJOR, enumerateScale } from './scale/modes';
+import { noise } from './module/noise';
+import { sampleAndHold } from './module/sampleAndHold';
 
 const ctx = new WiggleContext('#container');
 const master = clock(ctx, { beatsPerMinute: 120 });
@@ -78,15 +80,15 @@ output(ctx, {
 });
 
 const quantizedPitch = quantizer(ctx, {
-  source: attenuverter(ctx, {
-    source: vco(ctx, {
-      frequency: 120 / (60 * 16),
-      shape: 'sawtooth',
+  source: sampleAndHold(ctx, {
+    source: attenuverter(ctx, {
+      source: noise(ctx),
+      offset: PITCH.c4,
+      gain: 100,
     }),
-    offset: PITCH.c4,
-    gain: 100,
+    trigger: master.quarter,
   }),
-  quanta: enumerateScale({ root: 'db', mode: NATURAL_MINOR }),
+  quanta: enumerateScale({ root: 'e', mode: MAJOR }),
 });
 output(ctx, {
   source: vca(ctx, {

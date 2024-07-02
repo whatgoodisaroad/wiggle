@@ -86,7 +86,7 @@ const quantizedPitch = quantizer(ctx, {
     offset: PITCH.c4,
     gain: 100,
   }),
-  quanta: enumerateScale('db', NATURAL_MINOR),
+  quanta: enumerateScale({ root: 'db', mode: NATURAL_MINOR }),
 });
 output(ctx, {
   source: vca(ctx, {

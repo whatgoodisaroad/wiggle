@@ -27,7 +27,9 @@ export const PITCH_CLASS_INDEX: Record<PitchClass, number> = {
   b: 11,
 };
 
-const PITCHES_ARR: { pitchClass: PitchClass, octave: number; frequency: number }[] = [
+export type Octave = 0 | 1 | 2 | 3 | 4 | 5;
+
+const PITCHES_ARR: { pitchClass: PitchClass, octave: Octave; frequency: number }[] = [
   { pitchClass: 'c', octave: 0, frequency: 16.35 },
   { pitchClass: 'db', octave: 0, frequency: 17.32 },
   { pitchClass: 'd', octave: 0, frequency: 18.35 },
@@ -107,6 +109,10 @@ const pitchMap = new Map<string, number>(
     ({ pitchClass, octave, frequency }) => [`${pitchClass}${octave}`, frequency]
   )
 );
+
+export function getPitch(pitchClass: PitchClass, octave: Octave): number {
+  return pitchMap.get(`${pitchClass}${octave}`);
+}
 
 export const PITCH = {
   c0: pitchMap.get('c0'),

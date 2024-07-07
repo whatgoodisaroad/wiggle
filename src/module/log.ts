@@ -10,7 +10,7 @@ export function log(context: WiggleContext, { source }: { source: ModuleRef }) {
         { processorOptions: { sampleDenominator: 100 } }
       );
       node.port.onmessage = (message) => {
-        console.log(message.data);
+        console.log(message.data.sample);
       };
       return { node };
     },

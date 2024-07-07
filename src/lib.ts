@@ -18,6 +18,7 @@ import { attenuverter } from './module/attenuverter';
 import { MAJOR, enumerateScale } from './scale/modes';
 import { noise } from './module/noise';
 import { sampleAndHold } from './module/sampleAndHold';
+import { playback } from './widgets/playback';
 
 const ctx = new WiggleContext('#container');
 const master = clock(ctx, { beatsPerMinute: 120 });
@@ -104,4 +105,4 @@ output(ctx, {
   gain: 0.05
 });
 
-ctx.renderPlaybackWidget();
+playback(ctx);

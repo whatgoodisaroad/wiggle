@@ -23,7 +23,7 @@ export class WiggleContext {
   _audioContext: AudioContext | null = null;
   _oscillators: OscillatorNode[] = [];
   _containerSelector: string;
-
+  
   constructor(containerSelector: string) {
     this._containerSelector = containerSelector;
   }
@@ -111,41 +111,7 @@ export class WiggleContext {
     }
   }
 
-  renderPlaybackWidget() {
-    const timestamp = document.createElement('code');
-    let timestampUpdatePid: any = null;
-    const timestampUpdateInterval = 25;
-    const updateTimestamp = () => {
-      timestamp.textContent = this.timestamp;
-      timestampUpdatePid = setTimeout(() => updateTimestamp(), timestampUpdateInterval);
-    };
-    
-    const playStopButton = document.createElement('button');
-    playStopButton.textContent = 'Play';
-    playStopButton.addEventListener('click', (e) => {
-      if (this.isPlaying) {
-        this.stop();
-        if (timestampUpdatePid) {
-          clearTimeout(timestampUpdatePid);
-          timestampUpdatePid = null;
-        }
-        playStopButton.textContent = 'Play';
-      } else {
-        this.start();
-        updateTimestamp();
-        playStopButton.textContent = 'Stop';
-      }
-    });
-
-    const legend = document.createElement('legend');
-    legend.textContent = 'Playback';
-
-    const container = document.querySelector(this._containerSelector);
-    const widget = document.createElement('fieldset');
-    widget.appendChild(legend);
-    widget.appendChild(playStopButton);
-    widget.appendChild(document.createTextNode(' '));
-    widget.appendChild(timestamp);
-    container.appendChild(widget);
+  renderWidget(element: HTMLElement) {
+    document.querySelector(this._containerSelector).appendChild(element);
   }
 }

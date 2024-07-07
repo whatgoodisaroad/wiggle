@@ -23,7 +23,7 @@ export function drumSequencer(
         ? 0 
         : /^\d$/g.test(char)
         ? parseInt(char)
-        : 1,
+        : 10,
         0
       );
     }

@@ -16,112 +16,31 @@ class WhiteNoiseProcessor extends AudioWorkletProcessor {
     }
 }
 
-class AdsrProcessor extends AudioWorkletProcessor {
-
-  constructor() {
-    super();
-    this._triggeredAtByChannel = new Map();
-    this._isSustainingByChannel = new Map();
-    this._releasedAtByChannel = new Map();
+class ComparatorProcessor extends AudioWorkletProcessor {
+  constructor(options) {
+    super(options);
+    this._threshold = 0;
+    this._above = false;
   }
 
-  static get parameterDescriptors() {
-    return [
-      { name: 'attack', defaultValue: 0 },
-      { name: 'decay', defaultValue: 0 },
-      { name: 'sustain', defaultValue: 1 },
-      { name: 'release', defaultValue: 0 }
-    ];
-  }
-
-  process(inputs, outputs, parameters) {
+  process(inputs) {
     const input = inputs[0];
-    const output = outputs[0];
-    
     for (let channelIndex = 0; channelIndex < input.length; ++channelIndex) {
-      const inputChannel = input[channelIndex];
-      const outputChannel = output[channelIndex];
-      let triggeredAt = this._triggeredAtByChannel.get(channelIndex) ?? -1;
-      let isSustaining = this._isSustainingByChannel.get(channelIndex) ?? false;
-      let releasedAt = isSustaining ? -1 : this._releasedAtByChannel.get(channelIndex) ?? -1;
-
-      for (let sampleIndex = 0; sampleIndex < inputChannel.length; ++sampleIndex) {
-        const now = currentTime + sampleIndex / sampleRate;
-        const sample = inputChannel[sampleIndex];
-        
-        // Is this the beginning of a new sustain?
-        if (!isSustaining && sample > 0) {
-          triggeredAt = now;
-          this._triggeredAtByChannel.set(channelIndex, triggeredAt);
-          releasedAt = -1;
-          this._releasedAtByChannel.set(channelIndex, releasedAt);
+      for (
+        let sampleIndex = 0;
+        sampleIndex < input[channelIndex].length;
+        ++sampleIndex
+      ) {
+        const newAbove = input[channelIndex][sampleIndex] > this._threshold;
+        if (newAbove && !this._above) {
+          this.port.postMessage('above');
+        } else if (!newAbove && this._above) {
+          this.port.postMessage('below');
         }
-
-        // Or is this the end of a sustain?
-        if (isSustaining && sample <= 0) {
-          releasedAt = now;
-          this._releasedAtByChannel.set(channelIndex, releasedAt);
-        }
-
-        isSustaining = sample > 0;
-        
-        outputChannel[sampleIndex] = this.getLevel(
-          triggeredAt,
-          releasedAt,
-          now,
-          // TODO: check for constants
-          parameters.attack[0],
-          parameters.decay[0],
-          parameters.sustain[0],
-          parameters.release[0]
-        );
+        this._above = newAbove;
       }
-
-      this._isSustainingByChannel.set(channelIndex, isSustaining);
     }
     return true;
-  }
-
-  getLevel(
-    triggeredAt,
-    releasedAt,
-    currentTime,
-    attackTime,
-    decayTime,
-    sustainLevel,
-    releaseTime
-  ) {
-    // Zero if there has been no trigger;
-    if (triggeredAt < 0) {
-      return 0;
-    }
-    let phaseElapsed = currentTime - triggeredAt;
-
-    // Attack phase
-    if (attackTime > 0 && phaseElapsed < attackTime) {
-      return phaseElapsed / attackTime;
-    }
-    
-    // Decay phase
-    phaseElapsed -= attackTime;
-    if (decayTime > 0 && phaseElapsed < decayTime) {
-      return (1 - (phaseElapsed / decayTime)) * (1 - sustainLevel) + sustainLevel;
-    }
-
-    // Sustain phase
-    if (releasedAt === -1) {
-      return sustainLevel;
-    }
-
-    // Release phase
-    if (releasedAt > 0 && releaseTime > 0) {
-      const releaseElapsed = currentTime - releasedAt;
-      if (releaseElapsed < releaseTime) {
-        return (1 - (releaseElapsed / releaseTime)) * sustainLevel;
-      }
-    }
-
-    return 0;
   }
 }
 
@@ -203,15 +122,14 @@ class TriggerSequencerProcessor extends AudioWorkletProcessor {
 }
 
 class LoggingProcessor extends AudioWorkletProcessor {
-  process(inputs, outputs) {
-    const inputChannel = inputs[0][0];
-    for (
-      let sampleIndex = 0;
-      sampleIndex < inputChannel.length;
-      ++sampleIndex
-    ) {
-      console.log(inputChannel[sampleIndex]);
-    }
+  constructor(options) {
+    super(options);
+    this._index = 0;
+  }
+
+  process(inputs) {
+    this._index++;
+    console.log(inputs[0][0][0]);
     return true;
   }
 }
@@ -313,9 +231,8 @@ class SampleAndHoldProcessor extends AudioWorkletProcessor {
   }
 }
 
-
 registerProcessor("white-noise-processor", WhiteNoiseProcessor);
-registerProcessor("adsr-processor", AdsrProcessor);
+registerProcessor("comparator-processor", ComparatorProcessor);
 registerProcessor("gate-processor", GateProcessor);
 registerProcessor("control-sequencer-processor", ControlSequencerProcessor);
 registerProcessor('logging-processor', LoggingProcessor);

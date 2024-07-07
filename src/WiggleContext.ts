@@ -1,8 +1,17 @@
+type VirtualNode = {
+  input: AudioNode;
+  output: AudioNode;
+};
+
 export type ModuleId = number;
 export type Patch = number | ModuleRef;
 export type ModuleDefinition = {
   mapping: Record<string, Patch>;
-  create(context: AudioContext): ({ node: AudioNode; isOscillator?: boolean });
+  create(context: AudioContext): ({
+    node: AudioNode;
+    inputNode?: AudioNode;
+    isOscillator?: boolean;
+  });
   connect(inputName: string, source: AudioNode | number, destination: AudioNode);
 };
 export type Module = { id: ModuleId } & ModuleDefinition;
@@ -51,11 +60,11 @@ export class WiggleContext {
     const AudioContext = window.AudioContext || window['webkitAudioContext'];
     this._audioContext = new AudioContext();
     await this._audioContext.audioWorklet.addModule("../build/processors.js");
-    const nodes = { }; // new Map<ModuleId, AudioNode>();
+    const nodes: Record<ModuleId, VirtualNode> = { };
   
     for (const module of this._modules) {
-      const { node, isOscillator } = module.create(this._audioContext);
-      nodes[module.id] = node;
+      const { node, inputNode, isOscillator } = module.create(this._audioContext);
+      nodes[module.id] = { output: node, input: inputNode ?? node };
       if (isOscillator) {
         this._oscillators.push(node as OscillatorNode);
       }
@@ -76,12 +85,12 @@ export class WiggleContext {
           if (!sourceNode) {
             throw `Cannot find mapping source node ${mapping.id}`;
           }
-          source = sourceNode;
+          source = sourceNode.output;
         }
         if (source === undefined) {
           throw `Cannot complete mapping`;
         }
-        module.connect(inputName, source, destinationNode)
+        module.connect(inputName, source, destinationNode.input)
       }
     }
   

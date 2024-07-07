@@ -1,31 +1,85 @@
 import { ModuleRef, Patch, WiggleContext } from '../WiggleContext';
 
+type Comparison = 'above' | 'below';
+const minTime = 0.0001;
+
 export function adsr(
   context: WiggleContext,
-  { attack, decay, sustain, release, gate }: {
-    attack?: Patch,
-    decay?: Patch,
-    sustain?: Patch,
-    release?: Patch,
-    gate: ModuleRef,
+  {
+    attack = 0,
+    decay = 0,
+    sustain = 0,
+    release = 0,
+    gate,
+    retrigger,
+    linearAttack,
+    linearDecay,
+    linearRelease,
+  }: {
+    attack?: number;
+    decay?: number;
+    sustain?: number;
+    release?: number;
+    gate: ModuleRef;
+    retrigger?: boolean;
+    linearAttack?: boolean;
+    linearDecay?: boolean;
+    linearRelease?: boolean;
   }
 ) {
+  
   return context.define({
-    mapping: {
-      attack: attack ?? 0,
-      decay: decay ?? 0,
-      sustain: sustain ?? 0,
-      release: release ?? 0,
-      gate,
-    },
+    mapping: { gate },
     create(context) {
-      const node = new AudioWorkletNode(
-        context,
-        "adsr-processor",
-        { parameterData: { attack: 0, decay: 0, sustain: 0, release: 0 } }
-      );
-      return { node };
+      const comparator = new AudioWorkletNode(context, "comparator-processor");
+      
+      const node = new ConstantSourceNode(context);
+      node.offset.value = 0;
+
+      let oldComparison: Comparison = 'below'; 
+      comparator.port.onmessage = (message) => {
+        const newComparison: Comparison = message.data === 'above'
+          ? 'above' : 'below';
+        
+        if (
+          newComparison === 'above' &&
+          oldComparison === 'above' &&
+          !retrigger
+        ) {
+          return;
+        }
+
+        oldComparison = newComparison;
+
+        if (newComparison === 'above') {
+          node.offset.cancelScheduledValues(context.currentTime);
+          
+          if (retrigger) {
+            node.offset.setValueAtTime(0, context.currentTime)
+          }
+
+          scheduleAttackDecay(
+            node.offset,
+            context.currentTime,
+            attack,
+            decay,
+            sustain,
+            linearAttack,
+            linearDecay
+          );
+        } else if (sustain !== 0 && release > minTime) {
+          scheduleRelease(
+            node.offset,
+            context.currentTime,
+            release,
+            linearRelease
+          );
+        }
+      };
+
+      return { node, inputNode: comparator, isOscillator: true, };
     },
+
     connect(inputName, source, dest) {
       const worklet = dest as AudioWorkletNode;
       if (inputName === 'gate') {
@@ -33,20 +87,54 @@ export function adsr(
           throw `Invalid ADSR gate`;
         }
         source.connect(worklet);
-      } else if (
-        ['attack', 'decay', 'sustain', 'release'].indexOf(inputName) !== -1
-      ) {
-        // @ts-ignore
-        const param = worklet.parameters.get(inputName);
-        if (!param) {
-          throw `Unknown param ${inputName}`;
-        }
-        if (typeof source === 'number') {
-          param.value = source;
-        } else {
-          source.connect(param);
-        }
-      }
+      } 
     }
   });
+}
+
+function scheduleAttackDecay(
+  param: AudioParam,
+  startTime: number,
+  attackTime: number,
+  decayTime: number,
+  sustainLevel: number,
+  linearAttack: boolean,
+  linearDecay: boolean,
+): void {
+  const attackEnd = startTime + attackTime;
+  const decayEnd = startTime + attackTime + decayTime;
+  const attackLevel = decayTime > minTime ? 1 : sustainLevel;
+
+  if (attackTime < minTime) {
+    param.setValueAtTime(attackLevel, startTime);
+  } else if (linearAttack) {
+    param.linearRampToValueAtTime(attackLevel, attackEnd);
+  } else {
+    param.exponentialRampToValueAtTime(attackLevel, attackEnd);
+  }
+
+  if (decayTime < minTime) {
+    param.setValueAtTime(sustainLevel, decayEnd);
+  } else if (linearDecay) {
+    param.linearRampToValueAtTime(sustainLevel, decayEnd);
+  } else {
+    param.exponentialRampToValueAtTime(Math.max(sustainLevel, 0.0001), decayEnd);
+  }
+}
+
+function scheduleRelease(
+  param: AudioParam,
+  startTime: number,
+  releaseTime: number,
+  linearRelease: boolean,
+): void {
+  const releaseEnd = startTime + releaseTime;
+  param.cancelScheduledValues(startTime);
+  if (releaseTime < minTime) {
+    param.setValueAtTime(0, startTime);
+  } else if (linearRelease) {
+    param.linearRampToValueAtTime(0, releaseEnd);
+  } else {
+    param.exponentialRampToValueAtTime(0.0001, releaseEnd);
+  }
 }

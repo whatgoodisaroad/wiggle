@@ -12,8 +12,8 @@ export function fmKick(
   context: WiggleContext,
   {
     gate,
-    decay = 0.25,
-    pitchDecay = 0.15,
+    decay = 0.2,
+    pitchDecay = 0.1,
     frequency = PITCH.a0,
     fmPitchFactor = 1.1,
     cutoff,
@@ -35,9 +35,9 @@ export function fmKick(
         frequency: attenuverter(
           context, {
             source: adsr(context, {
-              attack: 0.05,
               decay: pitchDecay,
               gate,
+              retrigger: true,
             }),
             offset: frequency,
             gain: fmPitchFactor,
@@ -46,9 +46,9 @@ export function fmKick(
         shape: 'sine',
       }),
       gain: adsr(context, {
-        attack: 0.001,
         decay,
         gate,
+        retrigger: true,
       }),
     })
   });
@@ -57,9 +57,9 @@ export function fmKick(
       source: vca(context, {
         input: noise(context),
         gain: adsr(context, {
-          attack: 0.001,
           decay: 0.01,
           gate,
+          retrigger: true,
         }),
       }),
       cutoff: PITCH.a5,

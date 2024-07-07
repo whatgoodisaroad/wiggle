@@ -30,7 +30,7 @@ const melody = sequentialSwitch(ctx, {
   trigger: groove,
   sequence: [PITCH.g1, PITCH.a2, PITCH.c1]
 });
-const envelope = adsr(ctx, { gate: groove, decay: 0.2 });
+const envelope = adsr(ctx, { gate: groove, decay: 0.4 });
 const osc = vco(ctx, { frequency: melody, shape: 'square' });
 const level = vca(ctx, { input: osc, gain: envelope });
 const filter = vcf(ctx, {
@@ -61,7 +61,7 @@ output(ctx, {
     }),
     gain: kickVelocity,
   }),
-  gain: 0.7,
+  gain: 0.9,
 });
 output(ctx, {
   source: vca(ctx, {
@@ -97,8 +97,7 @@ output(ctx, {
       shape: 'sawtooth',
     }),
     gain: adsr(ctx, {
-      attack: 0.01,
-      decay: 0.1,
+      decay: 0.4,
       gate: master.quarter
     })
   }),

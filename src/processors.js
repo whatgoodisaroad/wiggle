@@ -66,11 +66,14 @@ class LoggingProcessor extends AudioWorkletProcessor {
   constructor(options) {
     super(options);
     this._index = 0;
+    this._sampleDenominator = options.processorOptions.sampleDenominator ?? 1;
   }
 
   process(inputs) {
     this._index++;
-    console.log(inputs[0][0][0]);
+    if (this._index % this._sampleDenominator === 0) {
+      this.port.postMessage(inputs[0][0][0]);
+    }
     return true;
   }
 }

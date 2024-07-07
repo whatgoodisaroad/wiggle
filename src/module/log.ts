@@ -4,7 +4,14 @@ export function log(context: WiggleContext, { source }: { source: ModuleRef }) {
   return context.define({
     mapping: { source },
     create(context) {
-      const node = new AudioWorkletNode(context, "logging-processor");
+      const node = new AudioWorkletNode(
+        context,
+        'logging-processor',
+        { processorOptions: { sampleDenominator: 100 } }
+      );
+      node.port.onmessage = (message) => {
+        console.log(message.data);
+      };
       return { node };
     },
     connect(inputName, source, dest) {

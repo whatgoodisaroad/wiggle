@@ -62,65 +62,6 @@ class GateProcessor extends AudioWorkletProcessor {
   }
 }
 
-class ControlSequencerProcessor extends AudioWorkletProcessor {
-  constructor(options) {
-    super(options);
-    this._step = 0;
-    this._sequence = options.processorOptions.sequence;
-    this._inputHigh = false;
-  }
-
-  process(inputs, outputs) {
-    const input = inputs[0];
-    const output = outputs[0];
-    for (let channelIndex = 0; channelIndex < input.length; ++channelIndex) {
-      for (
-        let sampleIndex = 0;
-        sampleIndex < input[channelIndex].length;
-        ++sampleIndex
-      ) {
-        const newInputHigh = input[channelIndex][sampleIndex] > 0;
-        if (!this._inputHigh && newInputHigh) {
-          this._step = (this._step + 1) % this._sequence.length;
-        }
-        this._inputHigh = newInputHigh;
-        output[channelIndex][sampleIndex] = this._sequence[this._step];
-      }
-    }
-    return true;
-  }
-}
-
-class TriggerSequencerProcessor extends AudioWorkletProcessor {
-  constructor(options) {
-    super(options);
-    this._step = 0;
-    this._sequence = options.processorOptions.sequence;
-    this._inputHigh = false;
-  }
-
-  process(inputs, outputs) {
-    const input = inputs[0];
-    const output = outputs[0];
-    for (let channelIndex = 0; channelIndex < input.length; ++channelIndex) {
-      for (
-        let sampleIndex = 0;
-        sampleIndex < input[channelIndex].length;
-        ++sampleIndex
-      ) {
-        const newInputHigh = input[channelIndex][sampleIndex] > 0;
-        if (!this._inputHigh && newInputHigh) {
-          this._step = (this._step + 1) % this._sequence.length;
-        }
-        this._inputHigh = newInputHigh;
-        output[channelIndex][sampleIndex] =
-          this._sequence[this._step] ? 1 : 0;
-      }
-    }
-    return true;
-  }
-}
-
 class LoggingProcessor extends AudioWorkletProcessor {
   constructor(options) {
     super(options);
@@ -234,9 +175,7 @@ class SampleAndHoldProcessor extends AudioWorkletProcessor {
 registerProcessor("white-noise-processor", WhiteNoiseProcessor);
 registerProcessor("comparator-processor", ComparatorProcessor);
 registerProcessor("gate-processor", GateProcessor);
-registerProcessor("control-sequencer-processor", ControlSequencerProcessor);
 registerProcessor('logging-processor', LoggingProcessor);
-registerProcessor("trigger-sequencer-processor", TriggerSequencerProcessor);
 registerProcessor("attenuverter-processor", AttenuverterProcessor);
 registerProcessor("quantizer-processor", QuantizerProcessor);
 registerProcessor("sample-and-hold-processor", SampleAndHoldProcessor);

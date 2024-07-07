@@ -77,7 +77,7 @@ export function adsr(
         }
       };
 
-      return { node, inputNode: comparator, isOscillator: true, };
+      return { node, inputNode: comparator, isSource: true, };
     },
 
     connect(inputName, source, dest) {

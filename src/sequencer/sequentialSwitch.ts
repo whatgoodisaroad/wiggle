@@ -26,7 +26,7 @@ export function sequentialSwitch(
         node.offset.setValueAtTime(sequence[index], context.currentTime);
       };
 
-      return { node, inputNode: comparator, isOscillator: true };
+      return { node, inputNode: comparator, isSource: true };
     },
     connect(inputName, source, dest) {
       const worklet = dest as AudioWorkletNode;

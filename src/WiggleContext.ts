@@ -10,7 +10,7 @@ export type ModuleDefinition = {
   create(context: AudioContext): ({
     node: AudioNode;
     inputNode?: AudioNode;
-    isOscillator?: boolean;
+    isSource?: boolean;
   });
   connect(inputName: string, source: AudioNode | number, destination: AudioNode);
 };
@@ -63,7 +63,7 @@ export class WiggleContext {
     const nodes: Record<ModuleId, VirtualNode> = { };
   
     for (const module of this._modules) {
-      const { node, inputNode, isOscillator } = module.create(this._audioContext);
+      const { node, inputNode, isSource: isOscillator } = module.create(this._audioContext);
       nodes[module.id] = { output: node, input: inputNode ?? node };
       if (isOscillator) {
         this._oscillators.push(node as OscillatorNode);

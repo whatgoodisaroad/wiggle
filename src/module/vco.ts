@@ -10,7 +10,7 @@ export function vco(
       const node = context.createOscillator();
       node.type = shape as OscillatorType;
       node.frequency.value = 0;
-      return { node, isOscillator: true };
+      return { node, isSource: true };
     },
     connect(inputName, source, dest) {
       const osc = dest as OscillatorNode;

@@ -43,6 +43,8 @@ const filter = vcf(ctx, {
 });
 const reverb = reverberator(ctx, { source: filter });
 output(ctx, { source: reverb, gain: 0.05 });
+scope(ctx, { source: reverb });
+
 
 const {
   gates: [kickGate, hatGate, snareGate],
@@ -78,7 +80,7 @@ output(ctx, {
   source: snare(ctx, {
     gate: snareGate,
   }),
-  gain: 0.5,
+  gain: 0.2,
 });
 
 const quantizedPitch = quantizer(ctx, {
@@ -107,4 +109,3 @@ output(ctx, {
 });
 
 playback(ctx);
-scope(ctx, { source: reverb });

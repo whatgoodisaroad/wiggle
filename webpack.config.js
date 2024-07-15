@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-  entry: './src/lib.ts',
+  entry: './src/song.ts',
   mode: 'development',
   module: {
     rules: [

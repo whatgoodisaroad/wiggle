@@ -1,28 +1,23 @@
 import { WiggleContext } from './WiggleContext';
-import { fmKick } from './instrument/fmKick';
-import { snare } from './instrument/snare';
-import { hat } from './instrument/hat';
-import { adsr } from './module/adsr';
-import { gateSequencer } from './sequencer/gateSequencer';
-import { output } from './module/output';
-import { sequentialSwitch } from './sequencer/sequentialSwitch';
-import { vca } from './module/vca';
-import { vcf } from './module/vcf';
-import { vco } from './module/vco';
+import { fmKick, snare, hat } from './instrument';
+import {
+  adsr,
+  output,
+  vca,
+  vcf,
+  vco,
+  clock,
+  reverberator,
+  quantizer,
+  attenuverter,
+  noise,
+  sampleAndHold,
+  sum,
+} from './module';
+import { gateSequencer, sequentialSwitch, drumSequencer } from './sequencer';
 import { PITCH } from './scale/chromatic';
-import { clock } from './module/clock';
-import { drumSequencer } from './sequencer/drumSequencer';
-import { reverberator } from './module/reverberator';
-import { quantizer } from './module/quantizer';
-import { attenuverter } from './module/attenuverter';
 import { MAJOR, enumerateScale } from './scale/modes';
-import { noise } from './module/noise';
-import { sampleAndHold } from './module/sampleAndHold';
-import { playback } from './widgets/playback';
-import { scope } from './widgets/scope';
-import { toggle } from './widgets/toggle';
-import { sum } from './module/sum';
-import { slider } from './widgets/slider';
+import { playback, scope, toggle, slider } from './widgets';
 
 const ctx = new WiggleContext('#container');
 const master = clock(ctx, { beatsPerMinute: 120 });

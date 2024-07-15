@@ -22,11 +22,24 @@ import { playback } from './widgets/playback';
 import { scope } from './widgets/scope';
 import { toggle } from './widgets/toggle';
 import { sum } from './module/sum';
+import { slider } from './widgets/slider';
 
 const ctx = new WiggleContext('#container');
 const master = clock(ctx, { beatsPerMinute: 120 });
 
 const drumsLevel = toggle(ctx, { label: 'Drums', initialState: false });
+const arpGain = slider(ctx, {
+  label: 'Arp Level',
+  minimum: 0,
+  maximum: 1,
+  initialValue: 0.75,
+});
+const bassLevel = slider(ctx, {
+  label: 'Bass Level',
+  minimum: 0,
+  maximum: 1,
+  initialValue: 0.75,
+});
 
 const groove = gateSequencer(ctx, {
   trigger: master.eighth,
@@ -46,7 +59,7 @@ const filter = vcf(ctx, {
   resonance: 20,
 });
 const reverb = reverberator(ctx, { source: filter });
-output(ctx, { source: reverb, gain: 0.05 });
+output(ctx, { source: vca(ctx, { input: reverb, gain: bassLevel }), gain: 0.1 });
 scope(ctx, { source: reverb });
 
 const {
@@ -99,14 +112,17 @@ const quantizedPitch = quantizer(ctx, {
 });
 output(ctx, {
   source: vca(ctx, {
-    input: vco(ctx, {
-      frequency: quantizedPitch,
-      shape: 'sawtooth',
+    input: vca(ctx, {
+      input: vco(ctx, {
+        frequency: quantizedPitch,
+        shape: 'sawtooth',
+      }),
+      gain: adsr(ctx, {
+        decay: 0.4,
+        gate: master.quarter,
+      })
     }),
-    gain: adsr(ctx, {
-      decay: 0.4,
-      gate: master.quarter,
-    })
+    gain: arpGain,
   }),
   gain: 0.1,
 });

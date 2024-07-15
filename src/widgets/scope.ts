@@ -1,4 +1,5 @@
 import { ModuleRef, WiggleContext } from '../WiggleContext';
+import { makeSvgElement } from './lib/svg';
 
 type Datum = { sample: number; timestamp: number };
 
@@ -16,7 +17,6 @@ export function scope(
     length?: number;
   }
 ): ModuleRef {
-
   const widget = document.createElement('fieldset');
 
   const legend = document.createElement('legend');
@@ -75,17 +75,6 @@ export function scope(
       }
     }
   });
-}
-
-function makeSvgElement(
-  name: string,
-  attributes?: Record<string, string | number>
-): SVGElement {
-  const elem = document.createElementNS("http://www.w3.org/2000/svg", name);
-  for (const key of Object.keys(attributes ?? {})) {
-    elem.setAttribute(key, `${attributes[key]}`);
-  }
-  return elem;
 }
 
 function renderScopeGrid(svg: SVGElement, width: number, height: number) {

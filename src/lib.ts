@@ -45,7 +45,6 @@ const reverb = reverberator(ctx, { source: filter });
 output(ctx, { source: reverb, gain: 0.05 });
 scope(ctx, { source: reverb });
 
-
 const {
   gates: [kickGate, hatGate, snareGate],
   velocities: [kickVelocity, hatVelocity]
@@ -102,10 +101,10 @@ output(ctx, {
     }),
     gain: adsr(ctx, {
       decay: 0.4,
-      gate: master.quarter
+      gate: master.quarter,
     })
   }),
-  gain: 0.05
+  gain: 0.1,
 });
 
 playback(ctx);

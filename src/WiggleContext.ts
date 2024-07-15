@@ -1,3 +1,7 @@
+type Concrete<Type> = {
+  [Property in keyof Type]-?: Type[Property];
+};
+
 type VirtualNode = {
   input: AudioNode;
   output: AudioNode;
@@ -6,15 +10,15 @@ type VirtualNode = {
 export type ModuleId = number;
 export type Patch = number | ModuleRef;
 export type ModuleDefinition = {
-  mapping: Record<string, Patch>;
+  mapping?: Record<string, Patch>;
   create(context: AudioContext): ({
     node: AudioNode;
     inputNode?: AudioNode;
     isSource?: boolean;
   });
-  connect(inputName: string, source: AudioNode | number, destination: AudioNode);
+  connect?: (inputName: string, source: AudioNode | number, destination: AudioNode) => void;
 };
-export type Module = { id: ModuleId } & ModuleDefinition;
+export type Module = { id: ModuleId } & Concrete<ModuleDefinition>;
 export type ModuleRef = { id: ModuleId; };
 
 export class WiggleContext {
@@ -32,7 +36,12 @@ export class WiggleContext {
 
   define(module: ModuleDefinition): ModuleRef {
     const id = ++this._idCounter;
-    this._modules.push({ ...module, id });
+    this._modules.push({
+      id,
+      mapping: {},
+      connect() {},
+      ...module,
+    });
     return { id };
   }
 
@@ -96,7 +105,7 @@ export class WiggleContext {
         if (source === undefined) {
           throw `Cannot complete mapping`;
         }
-        module.connect(inputName, source, destinationNode.input)
+        module.connect?.(inputName, source, destinationNode.input)
       }
     }
   }

@@ -11,7 +11,7 @@ export function playback(context: WiggleContext): void {
   
   const playStopButton = document.createElement('button');
   playStopButton.textContent = 'Play';
-  playStopButton.addEventListener('click', (e) => {
+  playStopButton.addEventListener('click', async (e) => {
     if (context.isPlaying) {
       context.stop();
       if (timestampUpdatePid) {
@@ -20,9 +20,12 @@ export function playback(context: WiggleContext): void {
       }
       playStopButton.textContent = 'Play';
     } else {
+      if (!context.isBuilt) {
+        await context.build();
+      }
       context.start();
       updateTimestamp();
-      playStopButton.textContent = 'Stop';
+      playStopButton.textContent = 'Pause';
     }
   });
 
@@ -34,7 +37,6 @@ export function playback(context: WiggleContext): void {
   widget.appendChild(playStopButton);
   widget.appendChild(document.createTextNode(' '));
   widget.appendChild(timestamp);
-
 
   context.renderWidget(widget);
 }

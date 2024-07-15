@@ -16,6 +16,30 @@ export function scope(
     length?: number;
   }
 ): ModuleRef {
+
+  const widget = document.createElement('fieldset');
+
+  const legend = document.createElement('legend');
+  legend.textContent = 'Scope';
+
+  const svg = makeSvgElement('svg', {
+    height,
+    width,
+    viewBox: `${-0.5 * width} ${-0.5 * height} ${width} ${height}`,
+  });
+  renderScopeGrid(svg, width, height);
+
+  const path = makeSvgElement('path', {
+    stroke: 'red',
+    fill: 'transparent',
+    d: '',
+  });
+  svg.appendChild(path);
+
+  widget.appendChild(legend);
+  widget.appendChild(svg);
+  ctx.renderWidget(widget);
+
   return ctx.define({
     mapping: { source },
     create(context) {
@@ -24,29 +48,6 @@ export function scope(
         'logging-processor',
         { processorOptions: { sampleDenominator: 1 } }
       );
-
-      const widget = document.createElement('fieldset');
-
-      const legend = document.createElement('legend');
-      legend.textContent = 'Scope';    
-
-      const svg = makeSvgElement('svg', {
-        height,
-        width,
-        viewBox: `${-0.5 * width} ${-0.5 * height} ${width} ${height}`,
-      });
-      renderScopeGrid(svg, width, height);
-
-      const path = makeSvgElement('path', {
-        stroke: 'red',
-        fill: 'transparent',
-        d: '',
-      });
-      svg.appendChild(path);
-      
-      widget.appendChild(legend);
-      widget.appendChild(svg);
-      ctx.renderWidget(widget);
 
       let data: Datum[] = [];
       node.port.onmessage = (message) => {

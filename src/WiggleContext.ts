@@ -21,8 +21,10 @@ export class WiggleContext {
   _idCounter: number = 0;
   _modules: Module[] = [];
   _audioContext: AudioContext | null = null;
-  _oscillators: OscillatorNode[] = [];
+  _sources: OscillatorNode[] = [];
   _containerSelector: string;
+  _started: boolean = false;
+  _suspended: boolean = false;
   
   constructor(containerSelector: string) {
     this._containerSelector = containerSelector;
@@ -34,8 +36,12 @@ export class WiggleContext {
     return { id };
   }
 
-  get isPlaying(): boolean {
+  get isBuilt(): boolean {
     return !!this._audioContext;
+  }
+
+  get isPlaying(): boolean {
+    return this._started && !this._suspended;
   }
 
   get timestamp(): string | null {
@@ -51,9 +57,9 @@ export class WiggleContext {
     return `${minutes}:${paddedSeconds}:${paddedFractional}`;
   }
 
-  async start(): Promise<void> {
+  async build(): Promise<void> {
     if (this._audioContext) {
-      console.log('Already started');
+      console.log('Already built');
       return;
     }
 
@@ -66,7 +72,7 @@ export class WiggleContext {
       const { node, inputNode, isSource: isOscillator } = module.create(this._audioContext);
       nodes[module.id] = { output: node, input: inputNode ?? node };
       if (isOscillator) {
-        this._oscillators.push(node as OscillatorNode);
+        this._sources.push(node as OscillatorNode);
       }
     }
   
@@ -93,22 +99,41 @@ export class WiggleContext {
         module.connect(inputName, source, destinationNode.input)
       }
     }
-  
-    for (const osc of this._oscillators) {
-      osc.start();
+  }
+
+  start() {
+    if (!this._audioContext) {
+      console.log('Not built');
+      return;
+    }
+    if (this._suspended) {
+      this._audioContext.resume();
+      this._suspended = false;
+    } else {
+      for (const source of this._sources) {
+        source.start();
+      }
+      this._started = true;
     }
   }
 
   stop() {
+    if (!this._started) {
+      console.log('Not started');
+      return;
+    }
+    this._suspended = true;
+    this._audioContext.suspend();
+  }
+
+  dispose() {
+    for (const source of this._sources) {
+      source.stop();
+    }
+    this._audioContext.close();
+    this._audioContext = null;
     this._modules = [];
-    while (this._oscillators.length > 0) {
-      const osc = this._oscillators.shift();
-      osc.stop();
-    }
-    if (this._audioContext) {
-      this._audioContext.close();
-      this._audioContext = null;
-    }
+    this._sources = [];
   }
 
   renderWidget(element: HTMLElement) {

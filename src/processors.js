@@ -71,7 +71,10 @@ class LoggingProcessor extends AudioWorkletProcessor {
 
   process(inputs) {
     this._index++;
-    if (this._index % this._sampleDenominator === 0) {
+    if (
+      this._index % this._sampleDenominator === 0 &&
+      inputs?.[0]?.[0]?.length > 0
+    ) {
       this.port.postMessage({
         sample: inputs[0][0][0],
         timestamp: currentTime,

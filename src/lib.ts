@@ -20,9 +20,13 @@ import { noise } from './module/noise';
 import { sampleAndHold } from './module/sampleAndHold';
 import { playback } from './widgets/playback';
 import { scope } from './widgets/scope';
+import { toggle } from './widgets/toggle';
+import { sum } from './module/sum';
 
 const ctx = new WiggleContext('#container');
 const master = clock(ctx, { beatsPerMinute: 120 });
+
+const drumsLevel = toggle(ctx, { label: 'Drums', initialState: false });
 
 const groove = gateSequencer(ctx, {
   trigger: master.eighth,
@@ -59,27 +63,27 @@ const {
 
 output(ctx, {
   source: vca(ctx, {
-    input: fmKick(ctx, {
-      gate: kickGate,
+    input: sum(ctx, {
+      inputs: [
+        vca(ctx, {
+          input: fmKick(ctx, {
+            gate: kickGate,
+          }),
+          gain: kickVelocity,
+        }),
+        vca(ctx, {
+          input: hat(ctx, {
+            gate: hatGate,
+          }),
+          gain: hatVelocity,
+        }),
+        snare(ctx, {
+          gate: snareGate,
+        }),
+      ]
     }),
-    gain: kickVelocity,
-  }),
-  gain: 0.9,
-});
-output(ctx, {
-  source: vca(ctx, {
-    input: hat(ctx, {
-      gate: hatGate,
-    }),
-    gain: hatVelocity,
-  }),
-  gain: 0.4,
-});
-output(ctx, {
-  source: snare(ctx, {
-    gate: snareGate,
-  }),
-  gain: 0.2,
+    gain: drumsLevel,
+  })
 });
 
 const quantizedPitch = quantizer(ctx, {

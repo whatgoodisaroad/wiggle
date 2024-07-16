@@ -43,3 +43,49 @@ export function enumerateScale({ root, mode }: Scale): ChromaticPitch[] {
 export function enumerateScalePitches({ root, mode }: Scale): number[] {
   return enumerateScale({ root, mode }).map(({ frequency }) => frequency);
 }
+
+export function chords({ root, mode }: Scale, chordOctave: number): {
+  I: number[];
+  ii: number[];
+  iii: number[];
+  IV: number[];
+  V: number[];
+  vi: number[];
+  viidim: number[];
+  I7: number[];
+  ii7: number[];
+  iii7: number[];
+  IV7: number[];
+  V7: number[];
+  vi7: number[];
+  viidim7: number[];
+} {
+  const allPitches = enumerateScale({ root, mode });
+  const startIndex = allPitches.findIndex(
+    ({ pitchClass, octave }) => pitchClass === root && octave == chordOctave
+  );
+  const range = allPitches
+    .slice(startIndex, startIndex + 2 * mode.length)
+    .map(({ frequency }) => frequency);
+
+  const result = {
+    I7: [range[0], range[2], range[4], range[6]],
+    ii7: [range[1], range[3], range[5], range[7]],
+    iii7: [range[2], range[4], range[6], range[8]],
+    IV7: [range[3], range[5], range[7], range[9]],
+    V7: [range[4], range[6], range[8], range[10]],
+    vi7: [range[5], range[7], range[9], range[11]],
+    viidim7: [range[6], range[8], range[10], range[12]],
+  };
+
+  return {
+    ...result,
+    I: result.I7.slice(0, 3),
+    ii: result.ii7.slice(0, 3),
+    iii: result.iii7.slice(0, 3),
+    IV: result.IV7.slice(0, 3),
+    V: result.V7.slice(0, 3),
+    vi: result.vi7.slice(0, 3),
+    viidim: result.viidim7.slice(0, 3),
+  }
+}

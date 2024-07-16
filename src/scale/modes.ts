@@ -1,4 +1,4 @@
-import { CHROMATIC_PICHES_IN_ORDER, Octave, PITCH_CLASS_INDEX, PitchClass } from "./chromatic";
+import { ChromaticPitch, PitchClass, CHROMATIC_PITCHES } from "./chromatic";
 
 export type ModeIntervals = (0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11)[];
 
@@ -16,20 +16,30 @@ export const MINOR_PENTATONIC: ModeIntervals  = [0, 3, 5, 7, 10];
 export const NATURAL_MINOR: ModeIntervals     = [0, 2, 3, 5, 7, 8, 10];
 export const PHRYGIAN: ModeIntervals          = [0, 1, 3, 5, 7, 8, 10];
 
-export function enumerateScale({ root, mode }: Scale): number[] {
-  const result: number[] = [];  
-  let chromaticRootIndex = PITCH_CLASS_INDEX[root];
-  let modeIndex = 0;
-  let modeOffset = 0;
-  while (chromaticRootIndex + modeOffset < CHROMATIC_PICHES_IN_ORDER.length) {
-    result.push(CHROMATIC_PICHES_IN_ORDER[chromaticRootIndex + modeOffset]);
-    modeIndex = (modeIndex + 1) % mode.length;
-    if (modeIndex === 0) {
-      modeOffset = 0;
-      chromaticRootIndex += 12;
-    } else {
-      modeOffset = mode[modeIndex];
+export function enumerateScale({ root, mode }: Scale): ChromaticPitch[] {
+  const firstIndex = CHROMATIC_PITCHES.findIndex(
+    ({ pitchClass }) => pitchClass === root
+  );
+  const result: ChromaticPitch[] = [];
+  for (
+    let octaveIndex = firstIndex - 12;
+    octaveIndex < CHROMATIC_PITCHES.length;
+    octaveIndex += 12
+  ) {
+    for (const modeIndex of mode) {
+      const pitchIndex = octaveIndex + modeIndex;
+      if (pitchIndex < 0) {
+        continue;
+      }
+      if (pitchIndex > CHROMATIC_PITCHES.length) {
+        break;
+      }
+      result.push(CHROMATIC_PITCHES[pitchIndex]);
     }
   }
   return result;
+}
+
+export function enumerateScalePitches({ root, mode }: Scale): number[] {
+  return enumerateScale({ root, mode }).map(({ frequency }) => frequency);
 }

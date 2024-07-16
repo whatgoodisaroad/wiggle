@@ -16,7 +16,7 @@ import {
 } from './module';
 import { gateSequencer, sequentialSwitch, drumSequencer } from './sequencer';
 import { PITCH } from './scale/chromatic';
-import { MAJOR, enumerateScale } from './scale/modes';
+import { MAJOR, enumerateScalePitches } from './scale/modes';
 import { playback, scope, toggle, slider } from './widgets';
 
 const ctx = new WiggleContext('#container');
@@ -103,7 +103,7 @@ const quantizedPitch = quantizer(ctx, {
     }),
     trigger: master.quarter,
   }),
-  quanta: enumerateScale({ root: 'e', mode: MAJOR }),
+  quanta: enumerateScalePitches({ root: 'e', mode: MAJOR }),
 });
 output(ctx, {
   source: vca(ctx, {

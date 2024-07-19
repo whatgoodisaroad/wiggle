@@ -9,6 +9,8 @@ import {
   reverberator,
   sum,
   clockDivider,
+  distortion,
+  vcf,
 } from './module';
 import { sequentialSwitch, drumSequencer } from './sequencer';
 import { MAJOR, chords } from './scale/modes';
@@ -20,6 +22,12 @@ const master = clock(ctx, { beatsPerMinute: 120 });
 const drumsLevel = toggle(ctx, { label: 'Drums', initialState: true });
 const melodyLevel = slider(ctx, {
   label: 'Melody Level',
+  minimum: 0,
+  maximum: 1,
+  initialValue: 0.75,
+});
+const bassLevel = slider(ctx, {
+  label: 'Bass Level',
   minimum: 0,
   maximum: 1,
   initialValue: 0.75,
@@ -86,7 +94,31 @@ const melody = vca(ctx, {
   }),
 });
 
-const mix = sum(ctx, { inputs: [drums, melody] });
+const basslineIndexSequence = [0, 0, 2, 1];
+const bassline = sequentialSwitch(ctx, {
+  trigger: master.beat,
+  sequence: sequence.map(
+    (chord, index) =>
+      chord[basslineIndexSequence[index % basslineIndexSequence.length]]
+  )
+});
+const bass = vca(ctx, {
+  gain: bassLevel,
+  input: vcf(ctx, {
+    type: 'lowpass',
+    cutoff: 300,
+    resonance: 2,
+    source: distortion(ctx, {
+      source: vco(ctx, {
+        frequency: bassline,
+        shape: 'square',
+      }),
+      amount: 700,
+    }),
+  }),
+});
+
+const mix = sum(ctx, { inputs: [drums, melody, bass] });
 output(ctx, { source: mix });
 scope(ctx, { source: mix });
 playback(ctx);

@@ -6,6 +6,7 @@ export * from './distortion';
 export * from './gate';
 export * from './log';
 export * from './noise';
+export * from './octave';
 export * from './output';
 export * from './quantizer';
 export * from './reverberator';

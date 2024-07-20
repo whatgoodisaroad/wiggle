@@ -11,6 +11,7 @@ import {
   clockDivider,
   distortion,
   vcf,
+  octave,
 } from './module';
 import { sequentialSwitch, drumSequencer } from './sequencer';
 import { MAJOR, chords } from './scale/modes';
@@ -95,12 +96,15 @@ const melody = vca(ctx, {
 });
 
 const basslineIndexSequence = [0, 0, 2, 1];
-const bassline = sequentialSwitch(ctx, {
-  trigger: master.beat,
-  sequence: sequence.map(
-    (chord, index) =>
-      chord[basslineIndexSequence[index % basslineIndexSequence.length]]
-  )
+const bassline = octave(ctx, {
+  octaves: -1,
+  source: sequentialSwitch(ctx, {
+    trigger: master.beat,
+    sequence: sequence.map(
+      (chord, index) =>
+        chord[basslineIndexSequence[index % basslineIndexSequence.length]]
+    )
+  })
 });
 const bass = vca(ctx, {
   gain: bassLevel,

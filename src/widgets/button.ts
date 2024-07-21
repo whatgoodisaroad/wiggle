@@ -1,31 +1,31 @@
 import { WiggleContext } from '../WiggleContext';
 
-export function toggle(
+export function button(
   context: WiggleContext,
   {
     label,
-    initialState = false,
   }: {
     label: string;
-    initialState?: boolean;
   }
 ) {
   const widget = document.createElement('fieldset');
   const legend = document.createElement('legend');
   legend.textContent = label;
-  const toggle = document.createElement('input');
-  toggle.setAttribute('type', 'checkbox');
-  toggle.checked = initialState;
+  const button = document.createElement('button');
+  button.textContent = label;
   widget.appendChild(legend);
-  widget.appendChild(toggle);
+  widget.appendChild(button);
   context.renderWidget(widget);
 
   return context.define({
     create(context) {
       const node = new ConstantSourceNode(context);
-      node.offset.value = initialState ? 1 : 0;
-      toggle.addEventListener('input', () => {
-        node.offset.setValueAtTime(toggle.checked ? 1 : 0, context.currentTime);
+      node.offset.value = 0;
+      button.addEventListener('mousedown', () => {
+        node.offset.setValueAtTime(1, context.currentTime);
+      });
+      button.addEventListener('mouseup', () => {
+        node.offset.setValueAtTime(0, context.currentTime);
       });
       return { node, isSource: true, };
     },

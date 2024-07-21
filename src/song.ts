@@ -12,10 +12,11 @@ import {
   distortion,
   vcf,
   octave,
+  sampleAndHold,
 } from './module';
 import { sequentialSwitch, drumSequencer } from './sequencer';
 import { MAJOR, chords } from './scale/modes';
-import { playback, scope, toggle, slider } from './widgets';
+import { playback, scope, toggle, slider, button } from './widgets';
 
 const ctx = new WiggleContext('#container');
 const master = clock(ctx, { beatsPerMinute: 120 });
@@ -106,23 +107,38 @@ const bassline = octave(ctx, {
     )
   })
 });
+
+const bassGroove = button(ctx, { label: 'Strum Bass' });
+
 const bass = vca(ctx, {
   gain: bassLevel,
-  input: vcf(ctx, {
-    type: 'lowpass',
-    cutoff: 300,
-    resonance: 2,
-    source: distortion(ctx, {
-      source: vco(ctx, {
-        frequency: bassline,
-        shape: 'square',
+  input: vca(ctx, {
+    gain: adsr(ctx, {
+      gate: bassGroove,
+      attack: 0.1,
+      decay: 0.2,
+      sustain: 0.8,
+      release: 0.5,
+    }),
+    input: vcf(ctx, {
+      type: 'lowpass',
+      cutoff: 300,
+      resonance: 2,
+      source: distortion(ctx, {
+        source: vco(ctx, {
+          frequency: sampleAndHold(ctx, {
+            source: bassline,
+            trigger: bassGroove,
+          }),
+          shape: 'square',
+        }),
+        amount: 700,
       }),
-      amount: 700,
     }),
   }),
 });
 
 const mix = sum(ctx, { inputs: [drums, melody, bass] });
 output(ctx, { source: mix });
-scope(ctx, { source: mix });
+scope(ctx, { source: bassGroove });
 playback(ctx);

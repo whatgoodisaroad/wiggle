@@ -148,34 +148,22 @@ class QuantizerProcessor extends AudioWorkletProcessor {
   }
 }
 
-class SampleAndHoldProcessor extends AudioWorkletProcessor {
-  static get parameterDescriptors() {
-    return [
-      { name: 'trigger', defaultValue: 0 },
-    ];
-  }
-
+class SampleProcessor extends AudioWorkletProcessor {
   constructor(options) {
     super(options);
-    this._sample = 0;
-    this._inputHigh = false;
+    this._value = 0;
+    this.port.onmessage = (e) => {
+      this.port.postMessage(this._value);
+    };
   }
 
-  process(inputs, outputs, parameters) {
-    const input = inputs[0];
-    const output = outputs[0];
-    for (let channelIndex = 0; channelIndex < input.length; ++channelIndex) {
-      for (
-        let sampleIndex = 0;
-        sampleIndex < input[channelIndex].length;
-        ++sampleIndex
-      ) {
-        this._inputHigh = parameters.trigger[sampleIndex] > 0;
-        if (this._inputHigh) {
-          this._sample = input[channelIndex][sampleIndex];
-        }
-        output[channelIndex][sampleIndex] = this._sample;
-      }
+  process(inputs) {
+    for (
+      let sampleIndex = 0;
+      sampleIndex < inputs[0][0].length;
+      ++sampleIndex
+    ) {
+      this._value = inputs[0][0][sampleIndex];
     }
     return true;
   }
@@ -187,4 +175,4 @@ registerProcessor("gate-processor", GateProcessor);
 registerProcessor('logging-processor', LoggingProcessor);
 registerProcessor("attenuverter-processor", AttenuverterProcessor);
 registerProcessor("quantizer-processor", QuantizerProcessor);
-registerProcessor("sample-and-hold-processor", SampleAndHoldProcessor);
+registerProcessor("sample-processor", SampleProcessor);

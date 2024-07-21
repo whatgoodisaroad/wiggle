@@ -16,7 +16,7 @@ import {
 } from './module';
 import { sequentialSwitch, drumSequencer } from './sequencer';
 import { MAJOR, chords } from './scale/modes';
-import { playback, scope, toggle, slider, button } from './widgets';
+import { playback, scope, toggle, slider } from './widgets';
 
 const ctx = new WiggleContext('#container');
 const master = clock(ctx, { beatsPerMinute: 120 });
@@ -36,13 +36,15 @@ const bassLevel = slider(ctx, {
 });
 
 const {
-  gates: [kickGate, hatGate, snareGate],
+  gates: [kickGate, hatGate, snareGate, melodyGroove, bassGroove],
   velocities: [kickVelocity, hatVelocity]
 } = drumSequencer(ctx, {
   channels: [
     '.   .   .   .   .   .   .   . 7 ',
     ' .5   5.',
     '    .   ',
+    '.. . ',
+    '. . ... . ',
   ],
   clockX2: master.eighth,
 });
@@ -80,10 +82,7 @@ const melody = vca(ctx, {
   input: reverberator(ctx, {
     source: vca(ctx, { 
       gain: adsr(ctx, {
-        gate: drumSequencer(ctx, {
-          channels: ['.. . '],
-          clockX2: master.eighth,
-        }).gates[0],
+        gate: melodyGroove,
         attack: 0.1,
         decay: 0.5,
       }),
@@ -108,17 +107,13 @@ const bassline = octave(ctx, {
   })
 });
 
-const bassGroove = button(ctx, { label: 'Strum Bass' });
-
 const bass = vca(ctx, {
   gain: bassLevel,
   input: vca(ctx, {
     gain: adsr(ctx, {
       gate: bassGroove,
-      attack: 0.1,
-      decay: 0.2,
-      sustain: 0.8,
-      release: 0.5,
+      attack: 0,
+      decay: 1,
     }),
     input: vcf(ctx, {
       type: 'lowpass',
@@ -140,5 +135,5 @@ const bass = vca(ctx, {
 
 const mix = sum(ctx, { inputs: [drums, melody, bass] });
 output(ctx, { source: mix });
-scope(ctx, { source: bassGroove });
+scope(ctx, { source: mix });
 playback(ctx);

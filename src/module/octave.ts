@@ -9,7 +9,6 @@ export function octave(context: WiggleContext, {
 }) {
   octaves = Math.floor(octaves);
   const factor = Math.pow(2, octaves);
-  console.log({ factor });
   return context.define({
     mapping: { source },
     create(context) {

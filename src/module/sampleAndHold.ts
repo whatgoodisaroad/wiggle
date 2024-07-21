@@ -4,30 +4,40 @@ export function sampleAndHold(
   context: WiggleContext,
   { source, trigger }: { source: ModuleRef; trigger: ModuleRef }
 ) {
+  let comparator: AudioWorkletNode | undefined;
   return context.define({
     mapping: { source, trigger },
     create(context) {
-      const node = new AudioWorkletNode(context, "sample-and-hold-processor");
-      return { node };
+      const sampler = new AudioWorkletNode(context, "sample-processor");
+      comparator = new AudioWorkletNode(context, "comparator-processor");
+
+      const node = new ConstantSourceNode(context);
+      comparator.port.onmessage = (message) => {
+        if (message.data === 'above') {
+          sampler.port.postMessage(null);
+        }
+      };
+
+      sampler.port.onmessage = (message) => {
+        node.offset.setValueAtTime(message.data, context.currentTime);
+      };
+      
+      return { node, inputNode: sampler, isSource: true };
     },
     connect(inputName, source, dest) {
-      const worklet = dest as AudioWorkletNode;
       if (inputName === 'source') {
         if (typeof source === 'number') {
           throw `Invalid s&h source`;
         } else {
-          source.connect(worklet);
+          source.connect(dest);
         }
       } else if (inputName === 'trigger') {
-        // @ts-ignore
-        const param = worklet.parameters.get('trigger');
-        if (!param) {
-          throw `Unknown param trigger`;
-        }
         if (typeof source === 'number') {
           throw `Invalid s&h trigger`;
+        } else if (!comparator) {
+          throw 'Comparator failed to initialize';
         } else {
-          source.connect(param);
+          source.connect(comparator);
         }
       }
     }

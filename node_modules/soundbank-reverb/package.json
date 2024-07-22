@@ -1,0 +1,29 @@
+{
+  "name": "soundbank-reverb",
+  "version": "1.1.2",
+  "description": "Simple Web Audio API based reverb effect.",
+  "main": "index.js",
+  "scripts": {
+    "test": "tape test/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mmckegg/soundbank-reverb.git"
+  },
+  "keywords": [
+    "reverb",
+    "waapi",
+    "soundbank",
+    "audio",
+    "browser"
+  ],
+  "author": "Matt McKegg",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mmckegg/soundbank-reverb/issues"
+  },
+  "homepage": "https://github.com/mmckegg/soundbank-reverb",
+  "devDependencies": {
+    "tape": "^3.4.0"
+  }
+}

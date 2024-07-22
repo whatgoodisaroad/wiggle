@@ -15,3 +15,7 @@ npm install
 npm run build     # Build the song defined in song.ts
 npm run serve     # Serve in your web browser 
 ```
+
+## Demo
+
+Visit [this page](https://whatgoodisaroad.github.io/wiggle/) for a demo.

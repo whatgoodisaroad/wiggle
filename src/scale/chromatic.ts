@@ -110,7 +110,7 @@ export const CHROMATIC_PITCHES: ChromaticPitch[] = [
   { pitchClass: 'b', octave: 5, frequency: 987.77 },
 ];
 
-const pitchMap = new Map<string, number>(
+export const pitchMap = new Map<string, number>(
   CHROMATIC_PITCHES.map(
     ({ pitchClass, octave, frequency }) => [`${pitchClass}${octave}`, frequency]
   )

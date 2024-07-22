@@ -13,10 +13,12 @@ import {
   vcf,
   octave,
   sampleAndHold,
+  attenuverter,
 } from './module';
 import { sequentialSwitch, drumSequencer } from './sequencer';
 import { MAJOR, chords } from './scale/modes';
 import { playback, scope, toggle, slider } from './widgets';
+import { keyboard } from './widgets/keyboard';
 
 const ctx = new WiggleContext('#container');
 const master = clock(ctx, { beatsPerMinute: 120 });
@@ -133,7 +135,58 @@ const bass = vca(ctx, {
   }),
 });
 
-const mix = sum(ctx, { inputs: [drums, melody, bass] });
+const { gate, pitch } = keyboard(ctx, { label: 'Lead' });
+const lead = vca(ctx, {
+  input: vcf(ctx, {
+    source: vca(ctx, {
+      input: vco(ctx, {
+        frequency: sum(ctx, {
+          inputs: [
+            pitch,
+            vca(ctx, {
+              input: vca(ctx, {
+                input: vco(ctx, {
+                  frequency: 8,
+                  shape: 'sine',
+                }),
+                gain: adsr(ctx, {
+                  gate,
+                  attack: 2,
+                  decay: 0.01,
+                  sustain: 1,
+                  release: 0.01,
+                }),
+              }),
+              gain: 25,
+            }),
+          ],
+        }),
+        shape: 'square',
+      }),
+      gain: adsr(ctx, {
+        gate,
+        attack: 0,
+        decay: 0.1,
+        sustain: 0.8,
+        release: 4,
+      }),
+    }),
+    type: 'lowpass',
+    cutoff: attenuverter(ctx, {
+      source: adsr(ctx, {
+        gate,
+        attack: 0,
+        decay: 0.2,
+      }),
+      offset: 100,
+      gain: 600,
+    }),
+    resonance: 10,
+  }),
+  gain: 0.2,
+});
+
+const mix = sum(ctx, { inputs: [drums, melody, bass, lead] });
 output(ctx, { source: mix });
 scope(ctx, { source: mix });
 playback(ctx);

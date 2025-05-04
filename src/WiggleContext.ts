@@ -23,11 +23,6 @@ export type ModuleDefinition = {
 };
 export type Module = { id: ModuleId } & Concrete<ModuleDefinition>;
 export type ModuleRef = Module;
-
-
-
-
-
 type SignalChain = {
   outputId: ModuleId;
   links: ModuleRef[];
@@ -95,18 +90,6 @@ export class WiggleContext {
   
   constructor(containerSelector: string) {
     this._containerSelector = containerSelector;
-  }
-
-  _define(module: ModuleDefinition): ModuleRef {
-    const id = `${++this._idCounter}`;
-    const ref: Module = {
-      id,
-      mapping: {},
-      connect() {},
-      ...module,
-    };
-    // this._modules.push(ref);
-    return ref;
   }
 
   register(module: ModuleRef): void {

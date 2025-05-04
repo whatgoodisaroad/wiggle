@@ -1,7 +1,7 @@
-import { ModuleRef, WiggleContext } from '../WiggleContext';
+import { defineModule } from '../WiggleContext';
 
-export function noise(context: WiggleContext) {
-  return context.define({
+export function noise() {
+  return defineModule({
     mapping: { },
     create(context) {
       const node = new AudioWorkletNode(context, "white-noise-processor");

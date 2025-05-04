@@ -1,4 +1,4 @@
-import { WiggleContext } from './WiggleContext';
+import { reify, toSignalChain, WiggleContext } from './WiggleContext';
 import { fmKick, snare, hat } from './instrument';
 import {
   adsr,
@@ -21,7 +21,7 @@ import { playback, scope, toggle, slider } from './widgets';
 import { keyboard } from './widgets/keyboard';
 
 const ctx = new WiggleContext('#container');
-const master = clock(ctx, { beatsPerMinute: 120 });
+const master = clock({ beatsPerMinute: 120 });
 
 const drumsLevel = toggle(ctx, { label: 'Drums', initialState: true });
 const melodyLevel = slider(ctx, {
@@ -40,7 +40,7 @@ const bassLevel = slider(ctx, {
 const {
   gates: [kickGate, hatGate, snareGate, melodyGroove, bassGroove],
   velocities: [kickVelocity, hatVelocity]
-} = drumSequencer(ctx, {
+} = drumSequencer({
   channels: [
     '.   .   .   .   .   .   .   . 7 ',
     ' .5   5.',
@@ -50,22 +50,22 @@ const {
   ],
   clockX2: master.eighth,
 });
-const drums = vca(ctx, {
-  input: sum(ctx, {
+const drums = vca({
+  input: sum({
     inputs: [
-      vca(ctx, {
-        input: fmKick(ctx, {
+      vca({
+        input: fmKick({
           gate: kickGate,
         }),
         gain: kickVelocity,
       }),
-      vca(ctx, {
-        input: hat(ctx, {
+      vca({
+        input: hat({
           gate: hatGate,
         }),
         gain: hatVelocity,
       }),
-      snare(ctx, {
+      snare({
         gate: snareGate,
       }),
     ]
@@ -75,22 +75,22 @@ const drums = vca(ctx, {
 
 const { I, V, vi, IV } = chords({ root: 'c', mode: MAJOR }, 3);
 const sequence = [I, V, vi, IV, vi, V, vi, IV];
-const freqSequences = [0, 1, 2].map((i) => sequentialSwitch(ctx, { 
-  trigger: clockDivider(ctx, { trigger: master.beat, division: 4 }),
+const freqSequences = [0, 1, 2].map((i) => sequentialSwitch({ 
+  trigger: clockDivider({ trigger: master.beat, division: 4 }),
   sequence: sequence.map((fs) => fs[i]),
 }));
-const melody = vca(ctx, {
+const melody = vca({
   gain: melodyLevel,
-  input: reverberator(ctx, {
-    source: vca(ctx, { 
-      gain: adsr(ctx, {
+  input: reverberator({
+    source: vca({ 
+      gain: adsr({
         gate: melodyGroove,
         attack: 0.1,
         decay: 0.5,
       }),
-      input: sum(ctx, {
+      input: sum({
         inputs: freqSequences.map(
-          (frequency) => vco(ctx, { frequency, shape: 'triangle' }),
+          (frequency) => vco({ frequency, shape: 'triangle' }),
         ),
       }),
     }),
@@ -98,9 +98,9 @@ const melody = vca(ctx, {
 });
 
 const basslineIndexSequence = [0, 0, 2, 1];
-const bassline = octave(ctx, {
+const bassline = octave({
   octaves: -1,
-  source: sequentialSwitch(ctx, {
+  source: sequentialSwitch({
     trigger: master.beat,
     sequence: sequence.map(
       (chord, index) =>
@@ -109,21 +109,21 @@ const bassline = octave(ctx, {
   })
 });
 
-const bass = vca(ctx, {
+const bass = vca({
   gain: bassLevel,
-  input: vca(ctx, {
-    gain: adsr(ctx, {
+  input: vca({
+    gain: adsr({
       gate: bassGroove,
       attack: 0,
       decay: 1,
     }),
-    input: vcf(ctx, {
+    input: vcf({
       type: 'lowpass',
       cutoff: 300,
       resonance: 2,
-      source: distortion(ctx, {
-        source: vco(ctx, {
-          frequency: sampleAndHold(ctx, {
+      source: distortion({
+        source: vco({
+          frequency: sampleAndHold({
             source: bassline,
             trigger: bassGroove,
           }),
@@ -136,20 +136,20 @@ const bass = vca(ctx, {
 });
 
 const { gate, pitch } = keyboard(ctx, { label: 'Lead' });
-const lead = vca(ctx, {
-  input: vcf(ctx, {
-    source: vca(ctx, {
-      input: vco(ctx, {
-        frequency: sum(ctx, {
+const lead = vca({
+  input: vcf({
+    source: vca({
+      input: vco({
+        frequency: sum({
           inputs: [
             pitch,
-            vca(ctx, {
-              input: vca(ctx, {
-                input: vco(ctx, {
+            vca({
+              input: vca({
+                input: vco({
                   frequency: 8,
                   shape: 'sine',
                 }),
-                gain: adsr(ctx, {
+                gain: adsr({
                   gate,
                   attack: 2,
                   decay: 0.01,
@@ -163,7 +163,7 @@ const lead = vca(ctx, {
         }),
         shape: 'square',
       }),
-      gain: adsr(ctx, {
+      gain: adsr({
         gate,
         attack: 0,
         decay: 0.1,
@@ -172,8 +172,8 @@ const lead = vca(ctx, {
       }),
     }),
     type: 'lowpass',
-    cutoff: attenuverter(ctx, {
-      source: adsr(ctx, {
+    cutoff: attenuverter({
+      source: adsr({
         gate,
         attack: 0,
         decay: 0.2,
@@ -186,7 +186,9 @@ const lead = vca(ctx, {
   gain: 0.2,
 });
 
-const mix = sum(ctx, { inputs: [drums, melody, bass, lead] });
-output(ctx, { source: mix });
+const mix = sum({ inputs: [drums, melody, bass, lead] });
+const o = output({ source: mix });
 scope(ctx, { source: mix });
-playback(ctx);
+// playback(ctx);
+
+reify(toSignalChain(o))

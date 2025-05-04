@@ -1,4 +1,4 @@
-import { ModuleRef, WiggleContext } from '../WiggleContext';
+import { ModuleRef, WiggleContext, defineModule } from '../WiggleContext';
 import { makeSvgElement } from './lib/svg';
 
 type Datum = { sample: number; timestamp: number };
@@ -40,7 +40,7 @@ export function scope(
   widget.appendChild(svg);
   ctx.renderWidget(widget);
 
-  return ctx.define({
+  return defineModule({
     mapping: { source },
     create(context) {
       const node = new AudioWorkletNode(

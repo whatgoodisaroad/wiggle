@@ -1,3 +1,6 @@
+import { playback } from "./widgets";
+import * as uuid from 'uuid';
+
 type Concrete<Type> = {
   [Property in keyof Type]-?: Type[Property];
 };
@@ -7,7 +10,7 @@ type VirtualNode = {
   output: AudioNode;
 };
 
-export type ModuleId = number;
+export type ModuleId = string;
 export type Patch = number | ModuleRef;
 export type ModuleDefinition = {
   mapping?: Record<string, Patch>;
@@ -19,7 +22,67 @@ export type ModuleDefinition = {
   connect?: (inputName: string, source: AudioNode | number, destination: AudioNode) => void;
 };
 export type Module = { id: ModuleId } & Concrete<ModuleDefinition>;
-export type ModuleRef = { id: ModuleId; };
+export type ModuleRef = Module;
+
+
+
+
+
+type SignalChain = {
+  outputId: ModuleId;
+  links: ModuleRef[];
+};
+
+function getUpstreamModules(downstream: ModuleRef): ModuleRef[] {
+  const result: ModuleRef[] = [];
+  for (const patch of Object.values(downstream.mapping ?? {})) {
+    if (typeof patch === 'number') {
+      continue;
+    }
+    result.push(patch);
+  }
+  return result;
+}
+
+export function toSignalChain(output: ModuleRef): SignalChain {
+  const upstream: Record<ModuleId, ModuleRef> = { };
+  const frontier = [output]
+  while (frontier.length > 0) {
+    const current = frontier.shift();
+    upstream[current.id] = current;
+    for (const next of getUpstreamModules(current)) {
+      if (next.id in upstream) {
+        continue;
+      }
+      frontier.push(next);
+    }
+  }
+  return {
+    outputId: output.id,
+    links: Object.values(upstream),
+  }
+}
+
+export function reify({ outputId, links }: SignalChain): void {
+  const outputModule = links.find(({ id }) => id === outputId);
+  if (!outputModule) {
+    throw 'Invalid signal chain';
+  }
+  const ctx = new WiggleContext('#container');
+  for (const module of links) {
+    ctx.register(module);
+  }
+  playback(ctx);
+}
+
+export function defineModule(module: ModuleDefinition): ModuleRef {
+  return {
+    id: uuid.v7(),
+    mapping: {},
+    connect() {},
+    ...module,
+  };
+}
 
 export class WiggleContext {
   _idCounter: number = 0;
@@ -34,15 +97,20 @@ export class WiggleContext {
     this._containerSelector = containerSelector;
   }
 
-  define(module: ModuleDefinition): ModuleRef {
-    const id = ++this._idCounter;
-    this._modules.push({
+  _define(module: ModuleDefinition): ModuleRef {
+    const id = `${++this._idCounter}`;
+    const ref: Module = {
       id,
       mapping: {},
       connect() {},
       ...module,
-    });
-    return { id };
+    };
+    // this._modules.push(ref);
+    return ref;
+  }
+
+  register(module: ModuleRef): void {
+    this._modules.push(module);
   }
 
   get isBuilt(): boolean {

@@ -1,8 +1,7 @@
-import { ModuleRef, WiggleContext } from '../WiggleContext';
+import { ModuleRef } from '../WiggleContext';
 import { sequentialSwitch } from './sequentialSwitch';
 
 export function gateSequencer(
-  context: WiggleContext,
   {
     sequence,
     trigger,
@@ -11,7 +10,7 @@ export function gateSequencer(
     trigger: ModuleRef;
   }
 ) {
-  return sequentialSwitch(context, {
+  return sequentialSwitch({
     trigger,
     sequence: sequence.map((gate) => gate ? 1 : 0)
   });

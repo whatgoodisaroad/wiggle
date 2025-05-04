@@ -1,7 +1,7 @@
-import { ModuleRef, WiggleContext } from '../WiggleContext';
+import { ModuleRef, defineModule } from '../WiggleContext';
 
-export function gate(context: WiggleContext, { source }: { source: ModuleRef }) {
-  return context.define({
+export function gate({ source }: { source: ModuleRef }) {
+  return defineModule({
     mapping: { source },
     create(context) {
       const node = new AudioWorkletNode(context, "gate-processor");

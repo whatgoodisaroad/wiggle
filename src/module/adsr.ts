@@ -1,10 +1,9 @@
-import { ModuleRef, Patch, WiggleContext } from '../WiggleContext';
+import { ModuleRef, defineModule } from '../WiggleContext';
 
 type Comparison = 'above' | 'below';
 const minTime = 0.0001;
 
 export function adsr(
-  context: WiggleContext,
   {
     attack = 0,
     decay = 0,
@@ -27,7 +26,7 @@ export function adsr(
     linearRelease?: boolean;
   }
 ) {
-  return context.define({
+  return defineModule({
     mapping: { gate },
     create(context) {
       const comparator = new AudioWorkletNode(context, "comparator-processor");

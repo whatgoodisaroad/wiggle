@@ -1,5 +1,5 @@
 import { PITCH, PitchClass, pitchMap } from '../scale/chromatic';
-import { ModuleRef, WiggleContext } from '../WiggleContext';
+import { ModuleRef, WiggleContext, defineModule } from '../WiggleContext';
 
 export function keyboard(
   context: WiggleContext,
@@ -90,14 +90,14 @@ export function keyboard(
   let pitch: ConstantSourceNode | undefined;
 
   const nodes = {
-    gate: context.define({
+    gate: defineModule({
       create(context) {
         gate = new ConstantSourceNode(context);
         gate.offset.value = 0;
         return { node: gate, isSource: true };
       },
     }),
-    pitch: context.define({
+    pitch: defineModule({
       create(context) {
         pitch = new ConstantSourceNode(context);
         pitch.offset.value = PITCH.c4;

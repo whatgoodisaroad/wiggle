@@ -1,10 +1,9 @@
-import { ModuleRef, WiggleContext } from '../WiggleContext';
+import { ModuleRef, defineModule } from '../WiggleContext';
 
 export function distortion(
-  context: WiggleContext,
   { source, amount = 400 }: { source: ModuleRef, amount?: number }
 ): ModuleRef {
-  return context.define({
+  return defineModule({
     mapping: { source },
     create(context) {
       const node = new WaveShaperNode(context)

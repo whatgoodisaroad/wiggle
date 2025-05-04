@@ -1,4 +1,4 @@
-import { WiggleContext } from '../WiggleContext';
+import { WiggleContext, defineModule } from '../WiggleContext';
 
 export function button(
   context: WiggleContext,
@@ -17,7 +17,7 @@ export function button(
   widget.appendChild(button);
   context.renderWidget(widget);
 
-  return context.define({
+  return defineModule({
     create(context) {
       const node = new ConstantSourceNode(context);
       node.offset.value = 0;

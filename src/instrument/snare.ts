@@ -1,4 +1,4 @@
-import { ModuleRef, WiggleContext } from '../WiggleContext';
+import { ModuleRef } from '../WiggleContext';
 import { adsr } from '../module/adsr';
 import { attenuverter } from '../module/attenuverter';
 import { distortion } from '../module/distortion';
@@ -10,41 +10,40 @@ import { vco } from '../module/vco';
 import { PITCH } from '../scale/chromatic';
 
 export function snare(
-  context: WiggleContext,
   { gate }: { gate: ModuleRef }
 ): ModuleRef {
   const [fundamental, partial1, partial2, partial3] = [
-    vco(context, { frequency: 203, shape: 'sine' }),
-    vco(context, { frequency: 456, shape: 'sine' }),
-    vco(context, { frequency: 597, shape: 'sine' }),
-    vco(context, { frequency: 920, shape: 'sine' }),
+    vco({ frequency: 203, shape: 'sine' }),
+    vco({ frequency: 456, shape: 'sine' }),
+    vco({ frequency: 597, shape: 'sine' }),
+    vco({ frequency: 920, shape: 'sine' }),
   ];
 
-  return distortion(context, {
+  return distortion({
     amount: 200,
-    source: vcf(context, {
+    source: vcf({
       type: 'lowshelf',
       cutoff: 1_000,
       resonance: 1,
-      source: sum(context, {
+      source: sum({
         inputs: [
           // Fundamental:
-          vca(context, {
+          vca({
             input: fundamental,
-            gain: adsr(context, {
+            gain: adsr({
               gate,
               attack: 0.001,
               decay: 0.15,
             }),
           }),
           // Overtones:
-          vca(context, {
-            input: sum(context, {
+          vca({
+            input: sum({
               inputs: [partial1, partial2, partial3],
             }),
             gain: 
-            attenuverter(context, {
-              source: adsr(context, {
+            attenuverter({
+              source: adsr({
                 gate,
                 attack: 0.001,
                 decay: 0.1,
@@ -53,11 +52,11 @@ export function snare(
             }),
           }),
           // Snares:
-          attenuverter(context, {
-            source: vcf(context, {
-              source: vca(context, {
-                input: noise(context),
-                gain: adsr(context, {
+          attenuverter({
+            source: vcf({
+              source: vca({
+                input: noise(),
+                gain: adsr({
                   attack: 0.01,
                   decay: 0.1,
                   gate,
@@ -70,10 +69,10 @@ export function snare(
             gain: 0.5,
           }),
           // Click:
-          attenuverter(context, {
-            source: vca(context, {
-              input: noise(context),
-              gain: adsr(context, {
+          attenuverter({
+            source: vca({
+              input: noise(),
+              gain: adsr({
                 attack: 0.01,
                 decay: 0.05,
                 gate,

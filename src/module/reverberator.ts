@@ -1,11 +1,10 @@
-import { ModuleRef, WiggleContext } from '../WiggleContext';
+import { ModuleRef, defineModule } from '../WiggleContext';
 import SimpleReverb from 'soundbank-reverb';
 
 export function reverberator(
-  context: WiggleContext,
   { source }: { source: ModuleRef }
 ): ModuleRef {
-  return context.define({
+  return defineModule({
     mapping: { source },
     create(context) {
       const node: AudioNode = new SimpleReverb(context);

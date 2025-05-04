@@ -1,4 +1,4 @@
-import { ModuleRef, WiggleContext } from '../WiggleContext';
+import { ModuleRef } from '../WiggleContext';
 import { adsr } from '../module/adsr';
 import { attenuverter } from '../module/attenuverter';
 import { noise } from '../module/noise';
@@ -9,7 +9,6 @@ import { vco } from '../module/vco';
 import { PITCH } from '../scale/chromatic';
 
 export function fmKick(
-  context: WiggleContext,
   {
     gate,
     decay = 0.2,
@@ -26,15 +25,15 @@ export function fmKick(
     cutoff?: number;
   }
 ): ModuleRef {
-  const body = vcf(context, {
+  const body = vcf({
     type: 'lowpass',
     cutoff: cutoff ?? (frequency * 8),
     resonance: 5,
-    source: vca(context, {
-      input: vco(context, {
+    source: vca({
+      input: vco({
         frequency: attenuverter(
-          context, {
-            source: adsr(context, {
+          {
+            source: adsr({
               decay: pitchDecay,
               gate,
               retrigger: true,
@@ -45,18 +44,18 @@ export function fmKick(
         ),
         shape: 'sine',
       }),
-      gain: adsr(context, {
+      gain: adsr({
         decay,
         gate,
         retrigger: true,
       }),
     })
   });
-  const transient = attenuverter(context, {
-    source: vcf(context, {
-      source: vca(context, {
-        input: noise(context),
-        gain: adsr(context, {
+  const transient = attenuverter({
+    source: vcf({
+      source: vca({
+        input: noise(),
+        gain: adsr({
           decay: 0.01,
           gate,
           retrigger: true,
@@ -68,5 +67,5 @@ export function fmKick(
     }),
     gain: 0.05,
   });
-  return sum(context, { inputs: [body, transient] });
+  return sum({ inputs: [body, transient] });
 }

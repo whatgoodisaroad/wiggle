@@ -1,6 +1,6 @@
-import { ModuleRef, Patch, WiggleContext } from '../WiggleContext';
+import { ModuleRef, Patch, defineModule } from '../WiggleContext';
 
-export function attenuverter(context: WiggleContext,
+export function attenuverter(
   {
     source,
     gain,
@@ -10,7 +10,7 @@ export function attenuverter(context: WiggleContext,
     gain?: Patch;
     offset?: Patch;
 }): ModuleRef {
-  return context.define({
+  return defineModule({
     mapping: { source, gain: gain ?? 1, offset: offset ?? 0 },
     create(context) {
       const node = new AudioWorkletNode(context, 'attenuverter-processor');

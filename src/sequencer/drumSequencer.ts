@@ -1,9 +1,8 @@
-import { ModuleRef, WiggleContext } from '../WiggleContext';
+import { ModuleRef } from '../WiggleContext';
 import { gateSequencer } from './gateSequencer';
 import { sequentialSwitch } from './sequentialSwitch';
 
 export function drumSequencer(
-  context: WiggleContext,
   {
     channels,
     clockX2,
@@ -28,7 +27,7 @@ export function drumSequencer(
       );
     }
     velocities.push(
-      sequentialSwitch(context, {
+      sequentialSwitch({
         sequence: unscaledVelocitySequence.map(
           (velocity) => velocity / 10
         ),
@@ -36,7 +35,7 @@ export function drumSequencer(
       })
     );
     gates.push(
-      gateSequencer(context, {
+      gateSequencer({
         sequence: unscaledVelocitySequence.map((gain) => gain !== 0),
         trigger: clockX2,
       })

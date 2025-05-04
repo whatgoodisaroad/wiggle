@@ -1,10 +1,9 @@
-import { ModuleRef, WiggleContext } from '../WiggleContext';
+import { ModuleRef, defineModule } from '../WiggleContext';
 
 export function output(
-  context: WiggleContext,
   { source, gain = 1 }: { source: ModuleRef; gain?: number }
 ) {
-  return context.define({
+  return defineModule({
     mapping: { source },
     create(context) {
       const node = new GainNode(context);

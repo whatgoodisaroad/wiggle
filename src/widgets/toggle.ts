@@ -1,4 +1,4 @@
-import { WiggleContext } from '../WiggleContext';
+import { WiggleContext, defineModule } from '../WiggleContext';
 
 export function toggle(
   context: WiggleContext,
@@ -20,7 +20,7 @@ export function toggle(
   widget.appendChild(toggle);
   context.renderWidget(widget);
 
-  return context.define({
+  return defineModule({
     create(context) {
       const node = new ConstantSourceNode(context);
       node.offset.value = initialState ? 1 : 0;

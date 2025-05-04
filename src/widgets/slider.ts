@@ -1,4 +1,4 @@
-import { ModuleRef, WiggleContext } from '../WiggleContext';
+import { ModuleRef, WiggleContext, defineModule } from '../WiggleContext';
 
 export function slider(
   context: WiggleContext,
@@ -32,7 +32,7 @@ export function slider(
   widget.appendChild(display);
   context.renderWidget(widget);
 
-  return context.define({
+  return defineModule({
     create(context) {
       const node = new ConstantSourceNode(context);
       node.offset.value = initialValue;

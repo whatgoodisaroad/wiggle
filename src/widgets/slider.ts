@@ -1,7 +1,6 @@
-import { ModuleRef, WiggleContext, defineModule } from '../WiggleContext';
+import { ModuleRef, defineModule } from '../WiggleContext';
 
 export function slider(
-  context: WiggleContext,
   {
     label,
     initialValue = 0,
@@ -16,22 +15,9 @@ export function slider(
     step?: number;
   }
 ): ModuleRef {
-  const widget = document.createElement('fieldset');
-  const legend = document.createElement('legend');
-  legend.textContent = label;
   const input = document.createElement('input');
-  input.setAttribute('type', 'range');
-  input.setAttribute('min', `${minimum}`);
-  input.setAttribute('max', `${maximum}`);
-  input.setAttribute('step', `${step}`);
-  input.setAttribute('value', `${initialValue}`);
   const display = document.createElement('code');
-  display.textContent = `${initialValue}`;
-  widget.appendChild(legend);
-  widget.appendChild(input);
-  widget.appendChild(display);
-  context.renderWidget(widget);
-
+  
   return defineModule({
     create(context) {
       const node = new ConstantSourceNode(context);
@@ -41,6 +27,22 @@ export function slider(
         display.textContent = `${input.value}`;
       });
       return { node, isSource: true, };
+    },
+
+    render() {
+      const widget = document.createElement('fieldset');
+      const legend = document.createElement('legend');
+      legend.textContent = label;
+      input.setAttribute('type', 'range');
+      input.setAttribute('min', `${minimum}`);
+      input.setAttribute('max', `${maximum}`);
+      input.setAttribute('step', `${step}`);
+      input.setAttribute('value', `${initialValue}`);
+      display.textContent = `${initialValue}`;
+      widget.appendChild(legend);
+      widget.appendChild(input);
+      widget.appendChild(display);
+      return widget;
     },
   });
 }

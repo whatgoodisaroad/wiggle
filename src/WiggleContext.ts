@@ -1,4 +1,3 @@
-import { playback } from "./widgets";
 import * as uuid from 'uuid';
 
 type Concrete<Type> = {
@@ -20,6 +19,7 @@ export type ModuleDefinition = {
     isSource?: boolean;
   });
   connect?: (inputName: string, source: AudioNode | number, destination: AudioNode) => void;
+  render?: () => HTMLElement | null;
 };
 export type Module = { id: ModuleId } & Concrete<ModuleDefinition>;
 export type ModuleRef = Module;
@@ -39,9 +39,15 @@ function getUpstreamModules(downstream: ModuleRef): ModuleRef[] {
   return result;
 }
 
-export function toSignalChain(output: ModuleRef): SignalChain {
+export function toSignalChain({
+  output,
+  additional = [],
+}: {
+  output: ModuleRef;
+  additional?: ModuleRef[];
+}): SignalChain {
   const upstream: Record<ModuleId, ModuleRef> = { };
-  const frontier = [output]
+  const frontier = [output, ...additional]
   while (frontier.length > 0) {
     const current = frontier.shift();
     upstream[current.id] = current;
@@ -66,6 +72,10 @@ export function reify({ outputId, links }: SignalChain): void {
   const ctx = new WiggleContext('#container');
   for (const module of links) {
     ctx.register(module);
+    const widget = module.render();
+    if (widget) {
+      ctx.renderWidget(widget);
+    }
   }
   playback(ctx);
 }
@@ -75,11 +85,12 @@ export function defineModule(module: ModuleDefinition): ModuleRef {
     id: uuid.v7(),
     mapping: {},
     connect() {},
+    render() { return null; },
     ...module,
   };
 }
 
-export class WiggleContext {
+class WiggleContext {
   _idCounter: number = 0;
   _modules: Module[] = [];
   _audioContext: AudioContext | null = null;
@@ -199,4 +210,45 @@ export class WiggleContext {
   renderWidget(element: HTMLElement) {
     document.querySelector(this._containerSelector).appendChild(element);
   }
+}
+
+function playback(context: WiggleContext): void {
+  const timestamp = document.createElement('code');
+  let timestampUpdatePid: any = null;
+  const timestampUpdateInterval = 25;
+  const updateTimestamp = () => {
+    timestamp.textContent = context.timestamp;
+    timestampUpdatePid = setTimeout(() => updateTimestamp(), timestampUpdateInterval);
+  };
+  
+  const playStopButton = document.createElement('button');
+  playStopButton.textContent = 'Play';
+  playStopButton.addEventListener('click', async (e) => {
+    if (context.isPlaying) {
+      context.stop();
+      if (timestampUpdatePid) {
+        clearTimeout(timestampUpdatePid);
+        timestampUpdatePid = null;
+      }
+      playStopButton.textContent = 'Play';
+    } else {
+      if (!context.isBuilt) {
+        await context.build();
+      }
+      context.start();
+      updateTimestamp();
+      playStopButton.textContent = 'Pause';
+    }
+  });
+
+  const legend = document.createElement('legend');
+  legend.textContent = 'Playback';
+
+  const widget = document.createElement('fieldset');
+  widget.appendChild(legend);
+  widget.appendChild(playStopButton);
+  widget.appendChild(document.createTextNode(' '));
+  widget.appendChild(timestamp);
+
+  context.renderWidget(widget);
 }

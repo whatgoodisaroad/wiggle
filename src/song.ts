@@ -1,4 +1,4 @@
-import { reify, toSignalChain, WiggleContext } from './WiggleContext';
+import { reify, toSignalChain } from './WiggleContext';
 import { fmKick, snare, hat } from './instrument';
 import {
   adsr,
@@ -17,20 +17,19 @@ import {
 } from './module';
 import { sequentialSwitch, drumSequencer } from './sequencer';
 import { MAJOR, chords } from './scale/modes';
-import { playback, scope, toggle, slider } from './widgets';
+import { scope, toggle, slider } from './widgets';
 import { keyboard } from './widgets/keyboard';
 
-const ctx = new WiggleContext('#container');
 const master = clock({ beatsPerMinute: 120 });
 
-const drumsLevel = toggle(ctx, { label: 'Drums', initialState: true });
-const melodyLevel = slider(ctx, {
+const drumsLevel = toggle({ label: 'Drums', initialState: true });
+const melodyLevel = slider({
   label: 'Melody Level',
   minimum: 0,
   maximum: 1,
   initialValue: 0.75,
 });
-const bassLevel = slider(ctx, {
+const bassLevel = slider({
   label: 'Bass Level',
   minimum: 0,
   maximum: 1,
@@ -135,7 +134,7 @@ const bass = vca({
   }),
 });
 
-const { gate, pitch } = keyboard(ctx, { label: 'Lead' });
+const { gate, pitch } = keyboard({ label: 'Lead' });
 const lead = vca({
   input: vcf({
     source: vca({
@@ -187,8 +186,7 @@ const lead = vca({
 });
 
 const mix = sum({ inputs: [drums, melody, bass, lead] });
+const s = scope({ source: mix });
 const o = output({ source: mix });
-scope(ctx, { source: mix });
-// playback(ctx);
 
-reify(toSignalChain(o))
+reify(toSignalChain({ output: o, additional: [s] }))

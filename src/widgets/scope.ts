@@ -1,10 +1,9 @@
-import { ModuleRef, WiggleContext, defineModule } from '../WiggleContext';
+import { ModuleRef, defineModule } from '../WiggleContext';
 import { makeSvgElement } from './lib/svg';
 
 type Datum = { sample: number; timestamp: number };
 
 export function scope(
-  ctx: WiggleContext,
   {
     source,
     height = 200,
@@ -38,19 +37,18 @@ export function scope(
 
   widget.appendChild(legend);
   widget.appendChild(svg);
-  ctx.renderWidget(widget);
 
   return defineModule({
     mapping: { source },
     create(context) {
-      const node = new AudioWorkletNode(
+      const inputNode = new AudioWorkletNode(
         context,
         'logging-processor',
         { processorOptions: { sampleDenominator: 1 } }
       );
 
       let data: Datum[] = [];
-      node.port.onmessage = (message) => {
+      inputNode.port.onmessage = (message) => {
         data = updateData(
           data,
           message.data,
@@ -61,8 +59,11 @@ export function scope(
           getPath(data, height, width, context.currentTime, length)
         );
       };
-      
-      return { node };
+
+      const node = new GainNode(context);
+      node.gain.value = 0;
+
+      return { inputNode, node };
     },
     connect(inputName, source, dest) {
       const vca = dest as GainNode;
@@ -73,7 +74,10 @@ export function scope(
           source.connect(vca);
         }
       }
-    }
+    },
+    render() {
+      return widget;
+    },
   });
 }
 

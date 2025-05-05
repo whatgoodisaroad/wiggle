@@ -1,21 +1,13 @@
-import { WiggleContext, defineModule } from '../WiggleContext';
+import { defineModule } from '../WiggleContext';
 
 export function button(
-  context: WiggleContext,
   {
     label,
   }: {
     label: string;
   }
 ) {
-  const widget = document.createElement('fieldset');
-  const legend = document.createElement('legend');
-  legend.textContent = label;
   const button = document.createElement('button');
-  button.textContent = label;
-  widget.appendChild(legend);
-  widget.appendChild(button);
-  context.renderWidget(widget);
 
   return defineModule({
     create(context) {
@@ -29,5 +21,15 @@ export function button(
       });
       return { node, isSource: true, };
     },
+
+    render() {
+      const widget = document.createElement('fieldset');
+      const legend = document.createElement('legend');
+      legend.textContent = label;
+      button.textContent = label;
+      widget.appendChild(legend);
+      widget.appendChild(button);
+      return widget;
+    }
   });
 }

@@ -1,7 +1,6 @@
-import { WiggleContext, defineModule } from '../WiggleContext';
+import { defineModule } from '../WiggleContext';
 
 export function toggle(
-  context: WiggleContext,
   {
     label,
     initialState = false,
@@ -10,15 +9,7 @@ export function toggle(
     initialState?: boolean;
   }
 ) {
-  const widget = document.createElement('fieldset');
-  const legend = document.createElement('legend');
-  legend.textContent = label;
   const toggle = document.createElement('input');
-  toggle.setAttribute('type', 'checkbox');
-  toggle.checked = initialState;
-  widget.appendChild(legend);
-  widget.appendChild(toggle);
-  context.renderWidget(widget);
 
   return defineModule({
     create(context) {
@@ -28,6 +19,17 @@ export function toggle(
         node.offset.setValueAtTime(toggle.checked ? 1 : 0, context.currentTime);
       });
       return { node, isSource: true, };
+    },
+
+    render() {
+      const widget = document.createElement('fieldset');
+      const legend = document.createElement('legend');
+      legend.textContent = label;
+      toggle.setAttribute('type', 'checkbox');
+      toggle.checked = initialState;
+      widget.appendChild(legend);
+      widget.appendChild(toggle);
+      return widget
     },
   });
 }

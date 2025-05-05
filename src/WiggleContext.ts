@@ -46,13 +46,13 @@ export function toSignalChain({
   output: ModuleRef;
   additional?: ModuleRef[];
 }): SignalChain {
-  const upstream: Record<ModuleId, ModuleRef> = { };
+  const upstream = new Map<ModuleId, ModuleRef>();
   const frontier = [output, ...additional]
   while (frontier.length > 0) {
     const current = frontier.shift();
-    upstream[current.id] = current;
+    upstream.set(current.id, current);
     for (const next of getUpstreamModules(current)) {
-      if (next.id in upstream) {
+      if (upstream.has(next.id)) {
         continue;
       }
       frontier.push(next);
@@ -60,7 +60,7 @@ export function toSignalChain({
   }
   return {
     outputId: output.id,
-    links: Object.values(upstream),
+    links: [...upstream.values()],
   }
 }
 

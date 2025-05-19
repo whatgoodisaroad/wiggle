@@ -1,5 +1,5 @@
 import { PITCH, PitchClass, pitchMap } from '../scale/chromatic';
-import { ModuleRef, defineModule } from '../WiggleContext';
+import { Module, defineModule } from '../WiggleContext';
 
 export function keyboard(
   {
@@ -8,8 +8,8 @@ export function keyboard(
     label: string;
   }
 ): {
-  gate: ModuleRef;
-  pitch: ModuleRef;
+  gate: Module;
+  pitch: Module;
 } {
   const { buttons, widget } = render(label);
 
@@ -18,6 +18,7 @@ export function keyboard(
 
   const nodes = {
     gate: defineModule({
+      namespace: 'wiggle/widgets/keyboard-gate',
       create(context) {
         gate = new ConstantSourceNode(context);
         gate.offset.value = 0;
@@ -25,6 +26,7 @@ export function keyboard(
       },
     }),
     pitch: defineModule({
+      namespace: 'wiggle/widgets/keyboard-pitch',
       create(context) {
         pitch = new ConstantSourceNode(context);
         pitch.offset.value = PITCH.c4;

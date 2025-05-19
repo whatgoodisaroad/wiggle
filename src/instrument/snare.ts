@@ -1,4 +1,4 @@
-import { ModuleRef } from '../WiggleContext';
+import { Module } from '../WiggleContext';
 import { adsr } from '../module/adsr';
 import { attenuverter } from '../module/attenuverter';
 import { distortion } from '../module/distortion';
@@ -10,8 +10,8 @@ import { vco } from '../module/vco';
 import { PITCH } from '../scale/chromatic';
 
 export function snare(
-  { gate }: { gate: ModuleRef }
-): ModuleRef {
+  { gate }: { gate: Module }
+): Module {
   const [fundamental, partial1, partial2, partial3] = [
     vco({ frequency: 203, shape: 'sine' }),
     vco({ frequency: 456, shape: 'sine' }),

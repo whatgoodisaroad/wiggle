@@ -10,6 +10,7 @@ export function button(
   const button = document.createElement('button');
 
   return defineModule({
+    namespace: 'wiggle/widgets/button',
     create(context) {
       const node = new ConstantSourceNode(context);
       node.offset.value = 0;

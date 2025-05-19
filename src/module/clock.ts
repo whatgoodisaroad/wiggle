@@ -1,16 +1,16 @@
-import { ModuleRef } from '../WiggleContext';
+import { Module } from '../WiggleContext';
 import { vco } from '../module/vco';
 import { clockDivider } from './clockDivider';
 
 export function clock(
   { beatsPerMinute }: { beatsPerMinute: number }
 ): {
-  beat: ModuleRef;
-  half: ModuleRef;
-  quarter: ModuleRef;
-  eighth: ModuleRef;
-  sixteenth: ModuleRef;
-  thirtySecond: ModuleRef;
+  beat: Module;
+  half: Module;
+  quarter: Module;
+  eighth: Module;
+  sixteenth: Module;
+  thirtySecond: Module;
 } {
   const thirtySecond = vco({
     frequency: 32 * beatsPerMinute / 60,

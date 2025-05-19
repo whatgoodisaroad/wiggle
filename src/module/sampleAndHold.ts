@@ -1,10 +1,11 @@
-import { ModuleRef, defineModule } from '../WiggleContext';
+import { Module, defineModule } from '../WiggleContext';
 
 export function sampleAndHold(
-  { source, trigger }: { source: ModuleRef; trigger: ModuleRef }
+  { source, trigger }: { source: Module; trigger: Module }
 ) {
   let comparator: AudioWorkletNode | undefined;
   return defineModule({
+    namespace: 'wiggle/sample-and-hold',
     mapping: { source, trigger },
     create(context) {
       const sampler = new AudioWorkletNode(context, "sample-processor");

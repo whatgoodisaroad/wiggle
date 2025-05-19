@@ -1,9 +1,10 @@
-import { ModuleRef, Patch, defineModule } from '../WiggleContext';
+import { Module, Patch, defineModule } from '../WiggleContext';
 
 export function vca(
-  { input, gain }: { input: ModuleRef, gain: Patch }
+  { input, gain }: { input: Module, gain: Patch }
 ) {
   return defineModule({
+    namespace: 'wiggle/vca',
     mapping: { input, gain },
     create(context) {
       const node = new GainNode(context);

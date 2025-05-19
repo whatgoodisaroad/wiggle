@@ -1,4 +1,4 @@
-import { reify, toSignalChain } from './WiggleContext';
+import { reify, toSignalChain, toStaticSignalChain } from './WiggleContext';
 import { fmKick, snare, hat } from './instrument';
 import {
   adsr,
@@ -190,3 +190,4 @@ const s = scope({ source: mix });
 const o = output({ source: mix });
 
 reify(toSignalChain({ output: o, additional: [s] }))
+console.log(toStaticSignalChain({ output: o, additional: [s] }));

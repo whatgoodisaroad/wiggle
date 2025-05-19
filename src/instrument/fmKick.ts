@@ -1,4 +1,4 @@
-import { ModuleRef } from '../WiggleContext';
+import { Module } from '../WiggleContext';
 import { adsr } from '../module/adsr';
 import { attenuverter } from '../module/attenuverter';
 import { noise } from '../module/noise';
@@ -17,14 +17,14 @@ export function fmKick(
     fmPitchFactor = 1.1,
     cutoff,
   }: {
-    gate: ModuleRef;
+    gate: Module;
     decay?: number;
     pitchDecay?: number;
     frequency?: number;
     fmPitchFactor?: number;
     cutoff?: number;
   }
-): ModuleRef {
+): Module {
   const body = vcf({
     type: 'lowpass',
     cutoff: cutoff ?? (frequency * 8),

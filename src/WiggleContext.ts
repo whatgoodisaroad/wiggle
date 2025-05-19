@@ -10,9 +10,12 @@ type VirtualNode = {
 };
 
 export type ModuleId = string;
-export type Patch = number | ModuleRef;
+export type Patch = number | Module;
+export type Mapping = Record<string, Patch>;
+export type Namespace = string;
 export type ModuleDefinition = {
-  mapping?: Record<string, Patch>;
+  namespace: Namespace;
+  mapping?: Mapping;
   create(context: AudioContext): ({
     node: AudioNode;
     inputNode?: AudioNode;
@@ -22,14 +25,24 @@ export type ModuleDefinition = {
   render?: () => HTMLElement | null;
 };
 export type Module = { id: ModuleId } & Concrete<ModuleDefinition>;
-export type ModuleRef = Module;
-type SignalChain = {
+export type SignalChain = {
   outputId: ModuleId;
-  links: ModuleRef[];
+  links: Module[];
 };
 
-function getUpstreamModules(downstream: ModuleRef): ModuleRef[] {
-  const result: ModuleRef[] = [];
+export type StaticMapping = Record<string, number | ModuleId>;
+export type StaticNode = {
+  id: ModuleId;
+  mapping: StaticMapping;
+  namespace: Namespace;
+};
+export type StaticSignalChain = {
+  outputId: ModuleId;
+  links: StaticNode[];
+};
+
+function getUpstreamModules(downstream: Module): Module[] {
+  const result: Module[] = [];
   for (const patch of Object.values(downstream.mapping ?? {})) {
     if (typeof patch === 'number') {
       continue;
@@ -39,14 +52,49 @@ function getUpstreamModules(downstream: ModuleRef): ModuleRef[] {
   return result;
 }
 
+export function toStaticSignalChain({
+  output,
+  additional = [],
+}: {
+  output: Module;
+  additional?: Module[];
+}): StaticSignalChain {
+  const upstream = new Map<ModuleId, StaticNode>();
+  const frontier = [output, ...additional]
+  while (frontier.length > 0) {
+    const current = frontier.shift();
+    
+    const mapping: StaticMapping = {};
+    for (const [inputName, patch] of Object.entries(current.mapping ?? {})) {
+      mapping[inputName] = typeof patch === 'number' ? patch : patch.id;
+    }
+    
+    upstream.set(current.id, {
+      id: current.id,
+      mapping,
+      namespace: current.namespace,
+    });
+    for (const next of getUpstreamModules(current)) {
+      if (upstream.has(next.id)) {
+        continue;
+      }
+      frontier.push(next);
+    }
+  }
+  return {
+    outputId: output.id,
+    links: [...upstream.values()],
+  }
+}
+
 export function toSignalChain({
   output,
   additional = [],
 }: {
-  output: ModuleRef;
-  additional?: ModuleRef[];
+  output: Module;
+  additional?: Module[];
 }): SignalChain {
-  const upstream = new Map<ModuleId, ModuleRef>();
+  const upstream = new Map<ModuleId, Module>();
   const frontier = [output, ...additional]
   while (frontier.length > 0) {
     const current = frontier.shift();
@@ -80,7 +128,7 @@ export function reify({ outputId, links }: SignalChain): void {
   playback(ctx);
 }
 
-export function defineModule(module: ModuleDefinition): ModuleRef {
+export function defineModule(module: ModuleDefinition): Module {
   return {
     id: uuid.v7(),
     mapping: {},
@@ -103,7 +151,7 @@ class WiggleContext {
     this._containerSelector = containerSelector;
   }
 
-  register(module: ModuleRef): void {
+  register(module: Module): void {
     this._modules.push(module);
   }
 

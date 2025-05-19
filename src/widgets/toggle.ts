@@ -12,6 +12,7 @@ export function toggle(
   const toggle = document.createElement('input');
 
   return defineModule({
+    namespace: 'wiggle/widgets/toggle',
     create(context) {
       const node = new ConstantSourceNode(context);
       node.offset.value = initialState ? 1 : 0;

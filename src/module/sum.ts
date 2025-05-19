@@ -1,13 +1,14 @@
-import { ModuleRef, Patch, defineModule } from '../WiggleContext';
+import { Module, Patch, defineModule } from '../WiggleContext';
 
 export function sum(
-  { inputs }: { inputs: ModuleRef[] }
-): ModuleRef {
+  { inputs }: { inputs: Module[] }
+): Module {
   const mapping: Record<string, Patch> = {};
   for (let index = 0; index < inputs.length; ++index) {
     mapping[index] = inputs[index];
   }
   return defineModule({
+    namespace: 'wiggle/sum',
     mapping,
     create(context) {
       const node = context.createGain();

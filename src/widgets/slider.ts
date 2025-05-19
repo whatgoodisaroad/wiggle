@@ -1,4 +1,4 @@
-import { ModuleRef, defineModule } from '../WiggleContext';
+import { Module, defineModule } from '../WiggleContext';
 
 export function slider(
   {
@@ -14,11 +14,12 @@ export function slider(
     maximum?: number;
     step?: number;
   }
-): ModuleRef {
+): Module {
   const input = document.createElement('input');
   const display = document.createElement('code');
   
   return defineModule({
+    namespace: 'wiggle/widgets/slider',
     create(context) {
       const node = new ConstantSourceNode(context);
       node.offset.value = initialValue;

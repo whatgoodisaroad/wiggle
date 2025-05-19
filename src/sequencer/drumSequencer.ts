@@ -1,4 +1,4 @@
-import { ModuleRef } from '../WiggleContext';
+import { Module } from '../WiggleContext';
 import { gateSequencer } from './gateSequencer';
 import { sequentialSwitch } from './sequentialSwitch';
 
@@ -8,11 +8,11 @@ export function drumSequencer(
     clockX2,
   }: {
     channels: string[];
-    clockX2: ModuleRef;
+    clockX2: Module;
   }
-): { gates: ModuleRef[]; velocities: ModuleRef[] } {
-  const gates: ModuleRef[] = [];
-  const velocities: ModuleRef[] = [];
+): { gates: Module[]; velocities: Module[] } {
+  const gates: Module[] = [];
+  const velocities: Module[] = [];
   for (const channel of channels) {
     const unscaledVelocitySequence: number[] = [];
     for (let index = 0; index < channel.length; ++index) {

@@ -1,14 +1,15 @@
-import { ModuleRef, defineModule } from '../WiggleContext';
+import { Module, defineModule } from '../WiggleContext';
 
 export function quantizer(
   {
     source,
     quanta,
   }: {
-    source: ModuleRef;
+    source: Module;
     quanta: number[];
-}): ModuleRef {
+}): Module {
   return defineModule({
+    namespace: 'wiggle/quantizer',
     mapping: { source },
     create(context) {
       const node = new AudioWorkletNode(

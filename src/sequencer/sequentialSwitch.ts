@@ -1,4 +1,4 @@
-import { ModuleRef, defineModule } from '../WiggleContext';
+import { Module, defineModule } from '../WiggleContext';
 
 export function sequentialSwitch(
   {
@@ -6,11 +6,12 @@ export function sequentialSwitch(
     trigger
   }: {
     sequence: number[];
-    trigger: ModuleRef;
+    trigger: Module;
   }
 ) {
   let index = 0;
   return defineModule({
+    namespace: 'wiggle/sequencer/sequential-switch',
     mapping: { trigger },
     create(context) {
       const comparator = new AudioWorkletNode(context, "comparator-processor");

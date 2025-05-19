@@ -1,4 +1,4 @@
-import { ModuleRef, Patch, defineModule } from '../WiggleContext';
+import { Module, Patch, defineModule } from '../WiggleContext';
 
 export function vcf(
   {
@@ -7,12 +7,13 @@ export function vcf(
     cutoff,
     resonance,
   }: {
-    source: ModuleRef;
+    source: Module;
     type: BiquadFilterType;
     cutoff: Patch,
     resonance: Patch,
-}): ModuleRef {
+}): Module {
   return defineModule({
+    namespace: 'wiggle/vcf',
     mapping: { source, cutoff, resonance },
     create(context) {
       const node = new BiquadFilterNode(context, { type });

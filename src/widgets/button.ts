@@ -1,15 +1,12 @@
 import { defineModule } from '../WiggleContext';
 
-export function button(
-  {
-    label,
-  }: {
-    label: string;
-  }
-) {
+export const button = defineModule(({
+  label,
+}: {
+  label: string;
+}) => {
   const button = document.createElement('button');
-
-  return defineModule({
+  return {
     namespace: 'wiggle/widgets/button',
     create(context) {
       const node = new ConstantSourceNode(context);
@@ -22,7 +19,6 @@ export function button(
       });
       return { node, isSource: true, };
     },
-
     render() {
       const widget = document.createElement('fieldset');
       const legend = document.createElement('legend');
@@ -31,6 +27,6 @@ export function button(
       widget.appendChild(legend);
       widget.appendChild(button);
       return widget;
-    }
-  });
-}
+    },
+  };
+});

@@ -3,19 +3,17 @@ import { makeSvgElement } from './lib/svg';
 
 type Datum = { sample: number; timestamp: number };
 
-export function scope(
-  {
-    source,
-    height = 200,
-    width = 500,
-    length = 1,
-  }: {
-    source: Module;
-    height?: number;
-    width?: number;
-    length?: number;
-  }
-): Module {
+export const scope = defineModule(({
+  source,
+  height = 200,
+  width = 500,
+  length = 1,
+}: {
+  source: Module;
+  height?: number;
+  width?: number;
+  length?: number;
+}) => {
   const widget = document.createElement('fieldset');
 
   const legend = document.createElement('legend');
@@ -38,7 +36,7 @@ export function scope(
   widget.appendChild(legend);
   widget.appendChild(svg);
 
-  return defineModule({
+  return {
     namespace: 'wiggle/widgets/scope',
     mapping: { source },
     create(context) {
@@ -79,8 +77,8 @@ export function scope(
     render() {
       return widget;
     },
-  });
-}
+  };
+});
 
 function renderScopeGrid(svg: SVGElement, width: number, height: number) {
   const v = makeSvgElement('line', {

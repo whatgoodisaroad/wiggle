@@ -54,7 +54,7 @@ export function fmKick(
   const transient = attenuverter({
     source: vcf({
       source: vca({
-        input: noise(),
+        input: noise({}),
         gain: adsr({
           decay: 0.01,
           gate,

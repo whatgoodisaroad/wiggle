@@ -55,7 +55,7 @@ export function snare(
           attenuverter({
             source: vcf({
               source: vca({
-                input: noise(),
+                input: noise({}),
                 gain: adsr({
                   attack: 0.01,
                   decay: 0.1,
@@ -71,7 +71,7 @@ export function snare(
           // Click:
           attenuverter({
             source: vca({
-              input: noise(),
+              input: noise({}),
               gain: adsr({
                 attack: 0.01,
                 decay: 0.05,

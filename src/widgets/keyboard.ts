@@ -1,4 +1,5 @@
-import { PITCH, PitchClass, pitchMap } from '../scale/chromatic';
+import { comparator } from '../module';
+import { PitchClass, pitchMap } from '../scale/chromatic';
 import { Module, defineModule } from '../WiggleContext';
 
 export function keyboard(
@@ -11,56 +12,48 @@ export function keyboard(
   gate: Module;
   pitch: Module;
 } {
-  const { buttons, widget } = render(label);
-
-  let gate: ConstantSourceNode | undefined;
-  let pitch: ConstantSourceNode | undefined;
-
-  const nodes = {
-    gate: defineModule({
-      namespace: 'wiggle/widgets/keyboard-gate',
-      create(context) {
-        gate = new ConstantSourceNode(context);
-        gate.offset.value = 0;
-        return { node: gate, isSource: true };
-      },
-    }),
-    pitch: defineModule({
-      namespace: 'wiggle/widgets/keyboard-pitch',
-      create(context) {
-        pitch = new ConstantSourceNode(context);
-        pitch.offset.value = PITCH.c4;
-        return { node: pitch, isSource: true };
-      },
-
-      render() {
-        return widget;
-      }
-    }),
-  };
-
-  for (const button of buttons) {
-    button.addEventListener('mousedown', (e) => {
-      if (!gate || !pitch) {
-        return;
-      }
-      gate.offset.setValueAtTime(1, gate.context.currentTime);
-      
-      const frequency = pitchMap.get((e.target as HTMLButtonElement).dataset.note);
-      if (frequency) {
-        pitch.offset.setValueAtTime(frequency, pitch.context.currentTime);
-      }
-    });
-    button.addEventListener('mouseup', (e) => {
-      if (!gate || !pitch) {
-        return;
-      }
-      gate.offset.setValueAtTime(0, gate.context.currentTime);
-    });
-  }
-
-  return nodes;
+  const pitch = keyboardInternal({ label });
+  const gate = comparator({ source: pitch });
+  return { gate, pitch };
 }
+
+export const keyboardInternal = defineModule(({
+  label,
+}: {
+  label: string;
+}) => {
+  let pitch: ConstantSourceNode | undefined;
+  return {
+    namespace: 'wiggle/keyboardInternal',
+    create(context) {
+      pitch = new ConstantSourceNode(context);
+      return { node: pitch, isSource: true };
+    },
+    render() {
+      const { buttons, widget } = render(label);
+
+      for (const button of buttons) {
+        button.addEventListener('mousedown', (e) => {
+          if (!pitch) {
+            return;
+          }
+          const frequency = pitchMap.get((e.target as HTMLButtonElement).dataset.note);
+          if (frequency) {
+            pitch.offset.setValueAtTime(frequency, pitch.context.currentTime);
+          }
+        });
+        button.addEventListener('mouseup', (e) => {
+          if (!pitch) {
+            return;
+          }
+          pitch.offset.setValueAtTime(0, pitch.context.currentTime);
+        });
+      }
+
+      return widget;
+    },
+  };
+});
 
 function render(label: string): { widget: HTMLElement; buttons: HTMLButtonElement[] } {
   const widget = document.createElement('fieldset');

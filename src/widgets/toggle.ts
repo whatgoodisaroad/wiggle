@@ -1,17 +1,14 @@
 import { defineModule } from '../WiggleContext';
 
-export function toggle(
-  {
-    label,
-    initialState = false,
-  }: {
-    label: string;
-    initialState?: boolean;
-  }
-) {
+export const toggle = defineModule(({
+  label,
+  initialState = false,
+}: {
+  label: string;
+  initialState?: boolean;
+}) => {
   const toggle = document.createElement('input');
-
-  return defineModule({
+  return {
     namespace: 'wiggle/widgets/toggle',
     create(context) {
       const node = new ConstantSourceNode(context);
@@ -32,5 +29,5 @@ export function toggle(
       widget.appendChild(toggle);
       return widget
     },
-  });
-}
+  };
+});

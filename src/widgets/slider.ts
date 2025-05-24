@@ -1,6 +1,6 @@
-import { Module, defineModule } from '../WiggleContext';
+import { defineModule } from '../WiggleContext';
 
-export function slider(
+export const slider = defineModule((
   {
     label,
     initialValue = 0,
@@ -14,11 +14,10 @@ export function slider(
     maximum?: number;
     step?: number;
   }
-): Module {
+) => {
   const input = document.createElement('input');
   const display = document.createElement('code');
-  
-  return defineModule({
+  return {
     namespace: 'wiggle/widgets/slider',
     create(context) {
       const node = new ConstantSourceNode(context);
@@ -45,5 +44,5 @@ export function slider(
       widget.appendChild(display);
       return widget;
     },
-  });
-}
+  };
+});

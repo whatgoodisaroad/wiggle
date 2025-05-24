@@ -17,8 +17,7 @@ import {
 } from './module';
 import { sequentialSwitch, drumSequencer } from './sequencer';
 import { MAJOR, chords } from './scale/modes';
-import { scope, toggle, slider } from './widgets';
-import { keyboard } from './widgets/keyboard';
+import { scope, toggle, slider, keyboard } from './widgets';
 
 const master = clock({ beatsPerMinute: 120 });
 

@@ -1,10 +1,14 @@
 import { Module, defineModule } from '../WiggleContext';
 
-export function sampleAndHold(
-  { source, trigger }: { source: Module; trigger: Module }
-) {
+export const sampleAndHold = defineModule(({
+  source,
+  trigger,
+}: {
+  source: Module;
+  trigger: Module;
+}) => {
   let comparator: AudioWorkletNode | undefined;
-  return defineModule({
+  return {
     namespace: 'wiggle/sample-and-hold',
     mapping: { source, trigger },
     create(context) {
@@ -41,5 +45,5 @@ export function sampleAndHold(
         }
       }
     }
-  });
-}
+  };
+});

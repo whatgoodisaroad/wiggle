@@ -128,14 +128,23 @@ export function reify({ outputId, links }: SignalChain): void {
   playback(ctx);
 }
 
-export function defineModule(module: ModuleDefinition): Module {
-  return {
-    id: uuid.v7(),
-    mapping: {},
-    connect() {},
-    render() { return null; },
-    ...module,
+type BaseModuleDefinition<T> = ((t: T) => Module) & { namespace: Namespace };
+
+export function defineModule<T>(
+  f: (t: T) => ModuleDefinition
+): BaseModuleDefinition<T> {
+  const r: ((t: T) => Module) & { namespace?: Namespace } = (t: T) => {
+    const d = f(t);
+    r.namespace = d.namespace;
+    return {
+      id: uuid.v7(),
+      mapping: {},
+      connect() {},
+      render() { return null; },
+      ...d,
+    };
   };
+  return r as BaseModuleDefinition<T>;
 }
 
 class WiggleContext {

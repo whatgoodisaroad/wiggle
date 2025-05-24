@@ -10,7 +10,7 @@ export function hat(
 ): Module {
   return vcf({
     source: vca({
-      input: noise(),
+      input: noise({}),
       gain: adsr({ attack: 0.005, decay, gate }),
     }),
     cutoff: PITCH.a1,

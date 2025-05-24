@@ -160,7 +160,7 @@ class SampleProcessor extends AudioWorkletProcessor {
   process(inputs) {
     for (
       let sampleIndex = 0;
-      sampleIndex < inputs[0][0].length;
+      sampleIndex < inputs[0][0]?.length ?? 0;
       ++sampleIndex
     ) {
       this._value = inputs[0][0][sampleIndex];

@@ -1,16 +1,14 @@
 import { Module, defineModule } from '../WiggleContext';
 
-export function sequentialSwitch(
-  {
-    sequence,
-    trigger
-  }: {
-    sequence: number[];
-    trigger: Module;
-  }
-) {
+export const sequentialSwitch = defineModule(({
+  sequence,
+  trigger
+}: {
+  sequence: number[];
+  trigger: Module;
+}) => {
   let index = 0;
-  return defineModule({
+  return {
     namespace: 'wiggle/sequencer/sequential-switch',
     mapping: { trigger },
     create(context) {
@@ -37,6 +35,6 @@ export function sequentialSwitch(
           source.connect(worklet);
         }
       }
-    }
-  });
-}
+    },
+  };
+});

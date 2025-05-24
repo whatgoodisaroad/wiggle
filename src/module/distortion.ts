@@ -1,29 +1,31 @@
 import { Module, defineModule } from '../WiggleContext';
 
-export function distortion(
-  { source, amount = 400 }: { source: Module, amount?: number }
-): Module {
-  return defineModule({
-    namespace: 'wiggle/distortion',
-    mapping: { source },
-    create(context) {
-      const node = new WaveShaperNode(context)
-      node.curve = makeDistortionCurve(amount);
-      node.oversample = '4x';
-      return { node };
-    },
-    connect(inputName, source, dest) {
-      const node = dest as WaveShaperNode;
-      if (inputName === 'source') {
-        if (typeof source === 'number') {
-          throw `Invalid distortion source`;
-        } else {
-          source.connect(node);
-        }
+export const distortion = defineModule(({
+  source,
+  amount = 400,
+}: {
+  source: Module;
+  amount?: number;
+}) => ({
+  namespace: 'wiggle/distortion',
+  mapping: { source },
+  create(context) {
+    const node = new WaveShaperNode(context)
+    node.curve = makeDistortionCurve(amount);
+    node.oversample = '4x';
+    return { node };
+  },
+  connect(inputName, source, dest) {
+    const node = dest as WaveShaperNode;
+    if (inputName === 'source') {
+      if (typeof source === 'number') {
+        throw `Invalid distortion source`;
+      } else {
+        source.connect(node);
       }
-    },
-  });
-}
+    }
+  },
+}));
 
 // From https://developer.mozilla.org/en-US/docs/Web/API/BaseAudioContext/createWaveShaper
 function makeDistortionCurve(amount?: number): Float32Array {

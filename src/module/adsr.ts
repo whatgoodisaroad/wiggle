@@ -3,93 +3,89 @@ import { Module, defineModule } from '../WiggleContext';
 type Comparison = 'above' | 'below';
 const minTime = 0.0001;
 
-export function adsr(
-  {
-    attack = 0,
-    decay = 0,
-    sustain = 0,
-    release = 0,
-    gate,
-    retrigger,
-    linearAttack,
-    linearDecay,
-    linearRelease,
-  }: {
-    attack?: number;
-    decay?: number;
-    sustain?: number;
-    release?: number;
-    gate: Module;
-    retrigger?: boolean;
-    linearAttack?: boolean;
-    linearDecay?: boolean;
-    linearRelease?: boolean;
-  }
-) {
-  return defineModule({
-    namespace: 'wiggle/adsr',
-    mapping: { gate },
-    create(context) {
-      const comparator = new AudioWorkletNode(context, "comparator-processor");
+export const adsr = defineModule(({
+  attack = 0,
+  decay = 0,
+  sustain = 0,
+  release = 0,
+  gate,
+  retrigger,
+  linearAttack,
+  linearDecay,
+  linearRelease,
+}: {
+  attack?: number;
+  decay?: number;
+  sustain?: number;
+  release?: number;
+  gate: Module;
+  retrigger?: boolean;
+  linearAttack?: boolean;
+  linearDecay?: boolean;
+  linearRelease?: boolean;
+}) => ({
+  namespace: 'wiggle/adsr',
+  mapping: { gate },
+  create(context) {
+    const comparator = new AudioWorkletNode(context, "comparator-processor");
+    
+    const node = new ConstantSourceNode(context);
+    node.offset.value = 0;
+
+    let oldComparison: Comparison = 'below'; 
+    comparator.port.onmessage = (message) => {
+      const newComparison: Comparison = message.data === 'above'
+        ? 'above' : 'below';
       
-      const node = new ConstantSourceNode(context);
-      node.offset.value = 0;
+      if (
+        newComparison === 'above' &&
+        oldComparison === 'above' &&
+        !retrigger
+      ) {
+        return;
+      }
 
-      let oldComparison: Comparison = 'below'; 
-      comparator.port.onmessage = (message) => {
-        const newComparison: Comparison = message.data === 'above'
-          ? 'above' : 'below';
+      oldComparison = newComparison;
+
+      if (newComparison === 'above') {
+        node.offset.cancelScheduledValues(context.currentTime);
         
-        if (
-          newComparison === 'above' &&
-          oldComparison === 'above' &&
-          !retrigger
-        ) {
-          return;
+        if (retrigger) {
+          node.offset.setValueAtTime(0, context.currentTime)
         }
 
-        oldComparison = newComparison;
+        scheduleAttackDecay(
+          node.offset,
+          context.currentTime,
+          attack,
+          decay,
+          sustain,
+          linearAttack,
+          linearDecay
+        );
+      } else if (sustain !== 0 && release > minTime) {
+        scheduleRelease(
+          node.offset,
+          context.currentTime,
+          release,
+          linearRelease
+        );
+      }
+    };
 
-        if (newComparison === 'above') {
-          node.offset.cancelScheduledValues(context.currentTime);
-          
-          if (retrigger) {
-            node.offset.setValueAtTime(0, context.currentTime)
-          }
+    return { node, inputNode: comparator, isSource: true, };
+  },
 
-          scheduleAttackDecay(
-            node.offset,
-            context.currentTime,
-            attack,
-            decay,
-            sustain,
-            linearAttack,
-            linearDecay
-          );
-        } else if (sustain !== 0 && release > minTime) {
-          scheduleRelease(
-            node.offset,
-            context.currentTime,
-            release,
-            linearRelease
-          );
-        }
-      };
-
-      return { node, inputNode: comparator, isSource: true, };
-    },
-
-    connect(inputName, source, dest) {
-      const worklet = dest as AudioWorkletNode;
-      if (inputName === 'gate') {
-        if (typeof source === 'number') {
-          throw `Invalid ADSR gate`;
-        }
-        source.connect(worklet);
-      } 
-    }
-  });
-}
+  connect(inputName, source, dest) {
+    const worklet = dest as AudioWorkletNode;
+    if (inputName === 'gate') {
+      if (typeof source === 'number') {
+        throw `Invalid ADSR gate`;
+      }
+      source.connect(worklet);
+    } 
+  }
+}))
 
 function scheduleAttackDecay(
   param: AudioParam,

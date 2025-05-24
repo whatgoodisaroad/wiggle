@@ -1,15 +1,15 @@
 import { Module, defineModule } from '../WiggleContext';
 
-export function octave({
+export const octave = defineModule(({
   source,
   octaves = 0,
 }: {
   source: Module;
   octaves?: number;
-}) {
+}) => {
   octaves = Math.floor(octaves);
   const factor = Math.pow(2, octaves);
-  return defineModule({
+  return {
     namespace: 'wiggle/octave',
     mapping: { source },
     create(context) {
@@ -26,6 +26,6 @@ export function octave({
           source.connect(worklet);
         }
       }
-    }
-  })
-}
+    },
+  };
+});

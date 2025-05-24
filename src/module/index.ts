@@ -2,6 +2,7 @@ export * from './adsr';
 export * from './attenuverter';
 export * from './clock';
 export * from './clockDivider';
+export * from './comparator';
 export * from './distortion';
 export * from './gate';
 export * from './log';

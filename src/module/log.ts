@@ -1,11 +1,10 @@
 import { Module, defineModule } from '../WiggleContext';
 
-export const log = defineModule(({
+export const log = defineModule('wiggle/log', ({
   source,
 }: {
   source: Module;
 }) => ({
-  namespace: 'wiggle/log',
   mapping: { source },
   create(context) {
     const node = new AudioWorkletNode(

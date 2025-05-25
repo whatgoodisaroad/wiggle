@@ -18,8 +18,9 @@ import {
 } from './module';
 import { sequentialSwitch } from './sequencer';
 import { button, keyboardInternal, scope, slider, toggle } from './widgets';
+import { Module } from './WiggleContext';
 
-export const modules = [
+const allModules = [
   adsr,
   attenuverter,
   button,
@@ -43,3 +44,5 @@ export const modules = [
   vcf,
   vco
 ];
+
+export const BASE_MODULES = new Map<string, (t: any) => Module>(allModules.map(m => [m.namespace, m]));

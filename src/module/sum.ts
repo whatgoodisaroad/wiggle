@@ -1,11 +1,7 @@
 import { Module, Patch, defineModule } from '../WiggleContext';
 
-export const sum = defineModule(({
-  inputs,
-}: {
-  inputs: Module[];
-}) => {
-  const mapping: Record<string, Patch> = {};
+export const sum = defineModule('wiggle/sum', (inputs: Module[]) => {
+  const mapping: Record<number, Patch> = {};
   for (let index = 0; index < inputs.length; ++index) {
     mapping[index] = inputs[index];
   }
@@ -14,7 +10,7 @@ export const sum = defineModule(({
     mapping,
     create(context) {
       const node = context.createGain();
-      node.gain.value = 1 / inputs.length;
+      node.gain.value = 1 / Object.keys(inputs).length;
       return { node };
     },
     connect(inputName, source, dest) {

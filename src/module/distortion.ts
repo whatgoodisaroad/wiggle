@@ -1,13 +1,12 @@
 import { Module, defineModule } from '../WiggleContext';
 
-export const distortion = defineModule(({
+export const distortion = defineModule('wiggle/distortion', ({
   source,
   amount = 400,
 }: {
   source: Module;
   amount?: number;
 }) => ({
-  namespace: 'wiggle/distortion',
   mapping: { source },
   create(context) {
     const node = new WaveShaperNode(context)

@@ -1,13 +1,12 @@
 import { defineModule } from '../WiggleContext';
 
-export const button = defineModule(({
+export const button = defineModule('wiggle/widgets/button', ({
   label,
 }: {
   label: string;
 }) => {
   const button = document.createElement('button');
   return {
-    namespace: 'wiggle/widgets/button',
     create(context) {
       const node = new ConstantSourceNode(context);
       node.offset.value = 0;

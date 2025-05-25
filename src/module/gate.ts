@@ -1,11 +1,10 @@
 import { Module, defineModule } from '../WiggleContext';
 
-export const gate = defineModule(({
+export const gate = defineModule('wiggle/gate', ({
   source,
 }: {
   source: Module;
 }) => ({
-  namespace: 'wiggle/gate',
   mapping: { source },
   create(context) {
     const node = new AudioWorkletNode(context, "gate-processor");

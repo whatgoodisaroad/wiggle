@@ -1,6 +1,6 @@
 import { defineModule } from '../WiggleContext';
 
-export const slider = defineModule((
+export const slider = defineModule('wiggle/widgets/slider', (
   {
     label,
     initialValue = 0,
@@ -18,7 +18,6 @@ export const slider = defineModule((
   const input = document.createElement('input');
   const display = document.createElement('code');
   return {
-    namespace: 'wiggle/widgets/slider',
     create(context) {
       const node = new ConstantSourceNode(context);
       node.offset.value = initialValue;

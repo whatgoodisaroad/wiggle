@@ -1,13 +1,12 @@
 import { Module, defineModule } from '../WiggleContext';
 
-export const output = defineModule(({
+export const output = defineModule('wiggle/output', ({
   source,
   gain = 1,
 }: {
   source: Module;
   gain?: number;
 }) => ({
-  namespace: 'wiggle/output',
   mapping: { source },
   create(context) {
     const node = new GainNode(context);

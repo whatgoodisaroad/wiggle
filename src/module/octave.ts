@@ -1,6 +1,6 @@
 import { Module, defineModule } from '../WiggleContext';
 
-export const octave = defineModule(({
+export const octave = defineModule('wiggle/octave', ({
   source,
   octaves = 0,
 }: {
@@ -10,7 +10,6 @@ export const octave = defineModule(({
   octaves = Math.floor(octaves);
   const factor = Math.pow(2, octaves);
   return {
-    namespace: 'wiggle/octave',
     mapping: { source },
     create(context) {
       const node = new GainNode(context);

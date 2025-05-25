@@ -3,7 +3,7 @@ import { makeSvgElement } from './lib/svg';
 
 type Datum = { sample: number; timestamp: number };
 
-export const scope = defineModule(({
+export const scope = defineModule('wiggle/widgets/scope', ({
   source,
   height = 200,
   width = 500,
@@ -37,7 +37,6 @@ export const scope = defineModule(({
   widget.appendChild(svg);
 
   return {
-    namespace: 'wiggle/widgets/scope',
     mapping: { source },
     create(context) {
       const inputNode = new AudioWorkletNode(

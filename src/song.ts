@@ -1,4 +1,4 @@
-import { reify, toSignalChain, toStaticSignalChain } from './WiggleContext';
+import { reifyStatic, toStaticSignalChain } from './WiggleContext';
 import { fmKick, snare, hat } from './instrument';
 import {
   adsr,
@@ -49,25 +49,23 @@ const {
   clockX2: master.eighth,
 });
 const drums = vca({
-  input: sum({
-    inputs: [
-      vca({
-        input: fmKick({
-          gate: kickGate,
-        }),
-        gain: kickVelocity,
+  input: sum([
+    vca({
+      input: fmKick({
+        gate: kickGate,
       }),
-      vca({
-        input: hat({
-          gate: hatGate,
-        }),
-        gain: hatVelocity,
+      gain: kickVelocity,
+    }),
+    vca({
+      input: hat({
+        gate: hatGate,
       }),
-      snare({
-        gate: snareGate,
-      }),
-    ]
-  }),
+      gain: hatVelocity,
+    }),
+    snare({
+      gate: snareGate,
+    }),
+  ]),
   gain: drumsLevel,
 });
 
@@ -86,11 +84,9 @@ const melody = vca({
         attack: 0.1,
         decay: 0.5,
       }),
-      input: sum({
-        inputs: freqSequences.map(
-          (frequency) => vco({ frequency, shape: 'triangle' }),
-        ),
-      }),
+      input: sum(freqSequences.map(
+        (frequency) => vco({ frequency, shape: 'triangle' }),
+      )),
     }),
   }),
 });
@@ -138,27 +134,25 @@ const lead = vca({
   input: vcf({
     source: vca({
       input: vco({
-        frequency: sum({
-          inputs: [
-            pitch,
-            vca({
-              input: vca({
-                input: vco({
-                  frequency: 8,
-                  shape: 'sine',
-                }),
-                gain: adsr({
-                  gate,
-                  attack: 2,
-                  decay: 0.01,
-                  sustain: 1,
-                  release: 0.01,
-                }),
+        frequency: sum([
+          pitch,
+          vca({
+            input: vca({
+              input: vco({
+                frequency: 8,
+                shape: 'sine',
               }),
-              gain: 25,
+              gain: adsr({
+                gate,
+                attack: 2,
+                decay: 0.01,
+                sustain: 1,
+                release: 0.01,
+              }),
             }),
-          ],
-        }),
+            gain: 25,
+          }),
+        ]),
         shape: 'square',
       }),
       gain: adsr({
@@ -184,9 +178,9 @@ const lead = vca({
   gain: 0.2,
 });
 
-const mix = sum({ inputs: [drums, melody, bass, lead] });
+const mix = sum([drums, melody, bass, lead]);
 const s = scope({ source: mix });
 const o = output({ source: mix });
 
-reify(toSignalChain({ output: o, additional: [s] }))
-console.log(toStaticSignalChain({ output: o, additional: [s] }));
+const ssc = toStaticSignalChain({ output: o, additional: [s] });
+reifyStatic(ssc);

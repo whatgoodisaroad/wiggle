@@ -1,6 +1,6 @@
 import { defineModule } from '../WiggleContext';
 
-export const toggle = defineModule(({
+export const toggle = defineModule('wiggle/widgets/toggle', ({
   label,
   initialState = false,
 }: {
@@ -9,7 +9,6 @@ export const toggle = defineModule(({
 }) => {
   const toggle = document.createElement('input');
   return {
-    namespace: 'wiggle/widgets/toggle',
     create(context) {
       const node = new ConstantSourceNode(context);
       node.offset.value = initialState ? 1 : 0;

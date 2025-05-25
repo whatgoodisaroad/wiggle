@@ -67,5 +67,5 @@ export function fmKick(
     }),
     gain: 0.05,
   });
-  return sum({ inputs: [body, transient] });
+  return sum([body, transient]);
 }

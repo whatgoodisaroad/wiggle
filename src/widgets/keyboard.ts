@@ -17,14 +17,13 @@ export function keyboard(
   return { gate, pitch };
 }
 
-export const keyboardInternal = defineModule(({
+export const keyboardInternal = defineModule('wiggle/keyboardInternal', ({
   label,
 }: {
   label: string;
 }) => {
   let pitch: ConstantSourceNode | undefined;
   return {
-    namespace: 'wiggle/keyboardInternal',
     create(context) {
       pitch = new ConstantSourceNode(context);
       return { node: pitch, isSource: true };

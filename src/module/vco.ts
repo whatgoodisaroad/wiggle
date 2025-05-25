@@ -1,13 +1,12 @@
 import { Module, Patch, defineModule } from '../WiggleContext';
 
-export const vco = defineModule(({
+export const vco = defineModule('wiggle/vco', ({
   frequency,
   shape,
 }: {
   frequency: Patch;
   shape: OscillatorType;
 }) => ({
-  namespace: 'wiggle/vco',
   mapping: { frequency },
   create(context) {
     const node = context.createOscillator();

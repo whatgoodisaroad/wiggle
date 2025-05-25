@@ -1,4 +1,5 @@
 import * as uuid from 'uuid';
+import { BASE_MODULES } from './registry';
 
 type Concrete<Type> = {
   [Property in keyof Type]-?: Type[Property];
@@ -14,7 +15,6 @@ export type Patch = number | Module;
 export type Mapping = Record<string, Patch>;
 export type Namespace = string;
 export type ModuleDefinition = {
-  namespace: Namespace;
   mapping?: Mapping;
   create(context: AudioContext): ({
     node: AudioNode;
@@ -24,22 +24,22 @@ export type ModuleDefinition = {
   connect?: (inputName: string, source: AudioNode | number, destination: AudioNode) => void;
   render?: () => HTMLElement | null;
 };
-export type Module = { id: ModuleId } & Concrete<ModuleDefinition>;
-export type SignalChain = {
-  outputId: ModuleId;
-  links: Module[];
-};
-
+export type Module = Concrete<ModuleDefinition> & {
+  id: ModuleId;
+  namespace: Namespace;
+  params: any;
+}
 export type StaticMapping = Record<string, number | ModuleId>;
 export type StaticNode = {
   id: ModuleId;
-  mapping: StaticMapping;
+  params: any;
   namespace: Namespace;
 };
 export type StaticSignalChain = {
   outputId: ModuleId;
   links: StaticNode[];
 };
+type BaseModuleDefinition<T> = ((t: T) => Module) & { namespace: Namespace };
 
 function getUpstreamModules(downstream: Module): Module[] {
   const result: Module[] = [];
@@ -60,7 +60,7 @@ export function toStaticSignalChain({
   additional?: Module[];
 }): StaticSignalChain {
   const upstream = new Map<ModuleId, StaticNode>();
-  const frontier = [output, ...additional]
+  const frontier = [output, ...additional];
   while (frontier.length > 0) {
     const current = frontier.shift();
     
@@ -71,8 +71,8 @@ export function toStaticSignalChain({
     
     upstream.set(current.id, {
       id: current.id,
-      mapping,
       namespace: current.namespace,
+      params: current.params,
     });
     for (const next of getUpstreamModules(current)) {
       if (upstream.has(next.id)) {
@@ -87,39 +87,21 @@ export function toStaticSignalChain({
   }
 }
 
-export function toSignalChain({
-  output,
-  additional = [],
-}: {
-  output: Module;
-  additional?: Module[];
-}): SignalChain {
-  const upstream = new Map<ModuleId, Module>();
-  const frontier = [output, ...additional]
-  while (frontier.length > 0) {
-    const current = frontier.shift();
-    upstream.set(current.id, current);
-    for (const next of getUpstreamModules(current)) {
-      if (upstream.has(next.id)) {
-        continue;
-      }
-      frontier.push(next);
-    }
-  }
-  return {
-    outputId: output.id,
-    links: [...upstream.values()],
-  }
-}
-
-export function reify({ outputId, links }: SignalChain): void {
+export function reifyStatic({ outputId, links }: StaticSignalChain): void {
   const outputModule = links.find(({ id }) => id === outputId);
   if (!outputModule) {
     throw 'Invalid signal chain';
   }
   const ctx = new WiggleContext('#container');
-  for (const module of links) {
+  for (const { id, params, namespace } of links) {
+    const moduleConstructor = BASE_MODULES.get(namespace);
+    if (!moduleConstructor) {
+      throw `Unknown module ${namespace}`;
+    }
+    const module = moduleConstructor(params);
+    module.id = id;
     ctx.register(module);
+
     const widget = module.render();
     if (widget) {
       ctx.renderWidget(widget);
@@ -128,23 +110,21 @@ export function reify({ outputId, links }: SignalChain): void {
   playback(ctx);
 }
 
-type BaseModuleDefinition<T> = ((t: T) => Module) & { namespace: Namespace };
-
 export function defineModule<T>(
+  namespace: Namespace,
   f: (t: T) => ModuleDefinition
 ): BaseModuleDefinition<T> {
-  const r: ((t: T) => Module) & { namespace?: Namespace } = (t: T) => {
-    const d = f(t);
-    r.namespace = d.namespace;
-    return {
-      id: uuid.v7(),
-      mapping: {},
-      connect() {},
-      render() { return null; },
-      ...d,
-    };
-  };
-  return r as BaseModuleDefinition<T>;
+  let g = (t: T) => ({
+    id: uuid.v7(),
+    mapping: {},
+    connect() {},
+    render() { return null; },
+    ...f(t),
+    namespace,
+    params: t,
+  }) as Module;
+  g['namespace'] = namespace;
+  return g as BaseModuleDefinition<T>;
 }
 
 class WiggleContext {

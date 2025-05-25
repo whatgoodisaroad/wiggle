@@ -3,7 +3,7 @@ import { Module, defineModule } from '../WiggleContext';
 type Comparison = 'above' | 'below';
 const minTime = 0.0001;
 
-export const adsr = defineModule(({
+export const adsr = defineModule('wiggle/adsr', ({
   attack = 0,
   decay = 0,
   sustain = 0,
@@ -24,7 +24,6 @@ export const adsr = defineModule(({
   linearDecay?: boolean;
   linearRelease?: boolean;
 }) => ({
-  namespace: 'wiggle/adsr',
   mapping: { gate },
   create(context) {
     const comparator = new AudioWorkletNode(context, "comparator-processor");

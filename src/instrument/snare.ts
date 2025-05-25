@@ -25,63 +25,59 @@ export function snare(
       type: 'lowshelf',
       cutoff: 1_000,
       resonance: 1,
-      source: sum({
-        inputs: [
-          // Fundamental:
-          vca({
-            input: fundamental,
-            gain: adsr({
+      source: sum([
+        // Fundamental:
+        vca({
+          input: fundamental,
+          gain: adsr({
+            gate,
+            attack: 0.001,
+            decay: 0.15,
+          }),
+        }),
+        // Overtones:
+        vca({
+          input: sum([partial1, partial2, partial3]),
+          gain: 
+          attenuverter({
+            source: adsr({
               gate,
               attack: 0.001,
-              decay: 0.15,
+              decay: 0.1,
             }),
+            gain: 0.2,
           }),
-          // Overtones:
-          vca({
-            input: sum({
-              inputs: [partial1, partial2, partial3],
-            }),
-            gain: 
-            attenuverter({
-              source: adsr({
-                gate,
-                attack: 0.001,
-                decay: 0.1,
-              }),
-              gain: 0.2,
-            }),
-          }),
-          // Snares:
-          attenuverter({
-            source: vcf({
-              source: vca({
-                input: noise({}),
-                gain: adsr({
-                  attack: 0.01,
-                  decay: 0.1,
-                  gate,
-                }),
-              }),
-              cutoff: PITCH.a5,
-              type: 'bandpass',
-              resonance: 0.05,
-            }),
-            gain: 0.5,
-          }),
-          // Click:
-          attenuverter({
+        }),
+        // Snares:
+        attenuverter({
+          source: vcf({
             source: vca({
               input: noise({}),
               gain: adsr({
                 attack: 0.01,
-                decay: 0.05,
+                decay: 0.1,
                 gate,
               }),
             }),
-            gain: 0.7,
+            cutoff: PITCH.a5,
+            type: 'bandpass',
+            resonance: 0.05,
           }),
-        ],
-      })
+          gain: 0.5,
+        }),
+        // Click:
+        attenuverter({
+          source: vca({
+            input: noise({}),
+            gain: adsr({
+              attack: 0.01,
+              decay: 0.05,
+              gate,
+            }),
+          }),
+          gain: 0.7,
+        }),
+      ])
     })
   });
 }

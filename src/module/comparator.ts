@@ -1,13 +1,12 @@
 import { Module, Patch, defineModule } from '../WiggleContext';
 
-export const comparator = defineModule(({
+export const comparator = defineModule('wiggle/comparator', ({
   source,
 }: {
   source: Module;
 }) => {
   let comparator: AudioWorkletNode | undefined;
   return {
-    namespace: 'wiggle/comparator',
     mapping: { source },
     create(context) {
       comparator = new AudioWorkletNode(context, "comparator-processor");

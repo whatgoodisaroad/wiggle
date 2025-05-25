@@ -173,7 +173,7 @@ class WiggleContext {
 
     const AudioContext = window.AudioContext || window['webkitAudioContext'];
     this._audioContext = new AudioContext();
-    await this._audioContext.audioWorklet.addModule("../build/processors.js");
+    await this._audioContext.audioWorklet.addModule("/processors.js");
     const nodes: Record<ModuleId, VirtualNode> = { };
   
     for (const module of this._modules) {
